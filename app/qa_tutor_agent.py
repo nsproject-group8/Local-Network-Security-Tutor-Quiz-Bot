@@ -18,24 +18,24 @@ collection = client.get_or_create_collection("network_security")
 OLLAMA_PATH = os.environ.get("OLLAMA_PATH") or shutil.which("ollama")
 
 def run_llama(prompt, model_name="llama3.2:3b"):
-    """Runs prompt through local Ollama model (offline).
+    """Runs prompt through local Ollama model (offline)."""
 
-    Resolution order:
-    1. Use `ollama` Python package if installed.
-    2. Use OLLAMA_PATH env var if set.
-    3. Use `ollama` binary found on PATH (shutil.which).
-    If none are available, returns a helpful error string.
-    """
-    # 1) Try Python package first (preferred for cross-platform)
+    # 1) Try Python package first
     try:
         import ollama
         try:
-            # ollama.generate returns a dict-like payload in newer versions; fall back to string handling
             r = ollama.generate(model=model_name, prompt=prompt)
-            # r may be a dict or object — try to extract text
+
+            # Some Ollama versions return a dict, others a stream or string
             if isinstance(r, dict):
-                return r.get("text") or r.get("output") or str(r)
-            return str(r)
+                # prefer .get("response") or .get("output") or .get("text")
+                return r.get("response") or r.get("output") or r.get("text") or str(r)
+            elif hasattr(r, "response"):
+                return r.response
+            elif isinstance(r, str):
+                return r
+            else:
+                return str(r)
         except Exception as e:
             return f"⚠️ Ollama (python package) error: {e}"
     except Exception:
@@ -56,15 +56,16 @@ def run_llama(prompt, model_name="llama3.2:3b"):
             stderr=subprocess.PIPE,
             timeout=120
         )
-
+        # Get plain text from stdout only
         output = result.stdout.decode("utf-8").strip()
-        if not output:
-            return f"⚠️ No response from Llama model.\nError: {result.stderr.decode('utf-8')}"
-        return output
+        # Strip structured metadata if present
+        output = re.sub(r"model='[^']+'.*?response='(.*?)'", r"\1", output, flags=re.DOTALL)
+        return output.strip()
     except FileNotFoundError:
         return f"⚠️ Llama model error: binary not found at {OLLAMA_PATH}"
     except Exception as e:
         return f"⚠️ Llama model error: {e}"
+
 
 # ----------------------------
 # Helper: Clean retrieved text
@@ -119,6 +120,9 @@ def ask(question, top_k=3, source_type=None, page=None, include_sources=True):
 
     matched_pairs = [ (d,m) for (d,m) in pairs if matches_meta(m) and len(str(d).split()) > 8 ]
 
+    # Debugging: Log matched pairs and metadata
+    print("🔍 Matched Pairs:", matched_pairs)
+
     used_pairs = matched_pairs
     used_as_fallback = False
     if not used_pairs:
@@ -158,7 +162,7 @@ Answer:
     cleaned_output = re.sub(r"thinking\s*=\s*[^\n]*", "", cleaned_output)
     cleaned_output = re.sub(r"\n{3,}", "\n\n", cleaned_output.strip())
 
-    # Prepare sources
+    # Ensure sources are properly retrieved and formatted
     if include_sources:
         if used_as_fallback:
             srcs = sorted({f"{m.get('source_type','?')} → {m.get('filename','?')}" for d,m in used_pairs})
@@ -171,7 +175,13 @@ Answer:
     else:
         sources_block = ""
 
-    return f"{cleaned_output}{sources_block}"
+    # Debugging: Log sources block
+    print("📚 Sources Block:", sources_block)
+
+    # Ensure only the proper answer is returned in text format
+    formatted_output = cleaned_output.strip()
+
+    return f"{formatted_output}{sources_block}"
 
 # 🧩 Quick local test
 if __name__ == "__main__":

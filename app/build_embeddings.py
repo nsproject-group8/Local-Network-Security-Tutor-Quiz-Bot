@@ -116,7 +116,19 @@ def embed_folder(folder, source_type):
             for i, chunk in enumerate(chunks):
                 docs_batch.append(chunk)
                 ids_batch.append(f"{source_type}_{file}_{i}")
-                metas_batch.append({"source_type": source_type, "filename": file})
+                # Ensure metadata includes all required fields
+                if not file or not source_type:
+                    print(f"⚠️ Skipping file due to missing metadata: {file}")
+                    continue
+
+                # Add detailed logging for debugging
+                print(f"🔹 Adding document: {file}, Source Type: {source_type}, Page: {i if fpath.lower().endswith('.pdf') else 'N/A'}")
+
+                # Ensure metadata consistency
+                meta = {"source_type": source_type, "filename": file}
+                if fpath.lower().endswith(".pdf"):
+                    meta["page"] = i
+                metas_batch.append(meta)
                 if len(docs_batch) >= EMBED_BATCH:
                     flush_batch()
 

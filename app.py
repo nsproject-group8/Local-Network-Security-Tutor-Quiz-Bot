@@ -24,8 +24,18 @@ def home():
 def tutor():
     if request.method == "POST":
         question = request.form["question"]
-        answer, sources = ask(question)
-        return render_template("tutor.html", question=question, answer=answer, sources=sources)
+        response = ask(question)
+        if "📚 Sources:" in response:
+            answer, sources = response.split("📚 Sources:", 1)
+        else:
+            answer, sources = response, "No sources available."
+
+        # Debugging: Print the sources obtained from the QA tutor
+        print("📚 Sources Obtained:", sources)
+        # Separate the sources and print them in a different part of the app
+        print("📚 Sources:")
+        print(sources.strip())
+        return render_template("tutor.html", question=question, answer=answer.strip(), sources=sources.strip())
     return render_template("tutor.html")
 
 
