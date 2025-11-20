@@ -1,4 +1,5 @@
 from pydantic_settings import BaseSettings
+from pydantic import field_validator
 from typing import Optional
 
 class Settings(BaseSettings):
@@ -36,5 +37,26 @@ class Settings(BaseSettings):
     class Config:
         env_file = ".env"
         case_sensitive = True
+
+    # Accept human-friendly sizes in the .env (e.g. '50MB', '10KB') and parse
+    # them into integer bytes. This makes .env.example readable while still
+    # validating to an int for runtime use.
+    @field_validator("MAX_UPLOAD_SIZE", mode="before")
+    @classmethod
+    def _parse_max_upload_size(cls, v):
+        if isinstance(v, str):
+            s = v.strip().upper()
+            try:
+                if s.endswith("MB"):
+                    return int(float(s[:-2]) * 1024 * 1024)
+                if s.endswith("KB"):
+                    return int(float(s[:-2]) * 1024)
+                if s.endswith("GB"):
+                    return int(float(s[:-2]) * 1024 * 1024 * 1024)
+                # Fallback: attempt to parse as plain integer string
+                return int(s)
+            except Exception as e:
+                raise ValueError(f"Invalid MAX_UPLOAD_SIZE value: {v}") from e
+        return v
 
 settings = Settings()

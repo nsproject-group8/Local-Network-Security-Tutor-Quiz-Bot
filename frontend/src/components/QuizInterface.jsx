@@ -254,6 +254,20 @@ function QuizInterface() {
                 </div>
               </div>
 
+              {/* Display the question */}
+              <div style={{ 
+                marginBottom: '1rem', 
+                padding: '0.75rem', 
+                backgroundColor: '#f0f9ff', 
+                borderRadius: '0.375rem',
+                border: '1px solid #bfdbfe'
+              }}>
+                <strong style={{ color: '#1e40af' }}>Question:</strong>
+                <p style={{ marginTop: '0.5rem', color: '#1e3a8a' }}>
+                  {fb.question}
+                </p>
+              </div>
+
               <div style={{ marginBottom: '0.75rem' }}>
                 <strong style={{ color: '#4b5563' }}>Your Answer:</strong>
                 <p style={{ marginTop: '0.25rem', padding: '0.5rem', backgroundColor: '#f9fafb', borderRadius: '0.25rem' }}>

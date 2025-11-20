@@ -1,31 +1,43 @@
-version: '3.8'
 services:
   backend:
     build:
       context: .
       dockerfile: backend/Dockerfile
     volumes:
-      - ./backend:/app/backend
+      - ./backend:/app/backend:delegated
       - ./data/chroma_db:/app/data/chroma_db
       - ./data/uploads:/app/data/uploads
+      - ./logs:/app/logs
+    env_file:
+      - .env
     environment:
       - PYTHONUNBUFFERED=1
-      # Use the internal Docker service name so the backend container can reach
-      # the Ollama service when it's run as a container in this compose file.
+      # Ensure the backend talks to the Ollama service inside the compose
       - OLLAMA_BASE_URL=http://ollama:11434
     depends_on:
       - ollama
     ports:
       - "8000:8000"
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fsS http://localhost:8000/health || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 6
 
   frontend:
     build:
       context: .
       dockerfile: frontend/Dockerfile
       args:
-        VITE_API_URL: "http://localhost:8000"
+        VITE_API_URL: "http://backend:8000"
+    environment:
+      - VITE_API_URL=http://backend:8000
     ports:
       - "3000:3000"
+    depends_on:
+      - backend
+    restart: unless-stopped
 
   ollama:
     image: ollama/ollama:latest
@@ -40,7 +52,3 @@ services:
       interval: 10s
       timeout: 5s
       retries: 6
-
-# Note: Ollama is not included here; please run Ollama natively or provide an
-# external service. You can add an "ollama" service if you have a containerized
-# Ollama image.

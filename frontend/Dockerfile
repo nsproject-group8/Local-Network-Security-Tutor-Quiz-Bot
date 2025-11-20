@@ -1,6 +1,6 @@
 FROM node:20-bullseye-slim
 
-ARG VITE_API_URL=http://localhost:8000
+ARG VITE_API_URL=http://backend:8000
 ENV VITE_API_URL=${VITE_API_URL}
 
 WORKDIR /app
@@ -8,9 +8,12 @@ WORKDIR /app
 # Install dependencies inside the container to ensure native optional deps
 # are resolved for the container architecture.
 COPY frontend/package.json frontend/package-lock.json* ./
-# Install without optional native modules to avoid platform-specific native
-# optional deps that can break inside cross-arch containers (npm optional bug).
-RUN npm ci --no-optional
+# Install dependencies including optional native modules. Some optional
+# packages (like Rollup native binaries) are required by the build step and
+# must be installed for the image's architecture. If this fails on your
+# platform, build the frontend locally and place `dist/` in the build context
+# so the image can reuse it.
+RUN npm ci
 
 # Copy the rest of the frontend source after installing deps to avoid
 # overwriting node_modules with host artifacts.

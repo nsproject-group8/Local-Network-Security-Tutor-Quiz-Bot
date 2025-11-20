@@ -307,7 +307,26 @@ Only output valid JSON, nothing else."""
                 feedback = "Correct! Well done."
                 grade = "A"
             else:
-                feedback = f"Incorrect. The correct answer is: {correct_answer_clean}"
+                # Ask the LLM to explain why the user's choice is incorrect and
+                # why the correct answer is correct. Include the citation/context
+                # to ground the explanation when possible.
+                explain_prompt = f"""A student answered a multiple-choice question incorrectly.
+
+Question: {question.question}
+Options: {question.options}
+Correct Answer: {correct_answer_clean}
+Student Answer: {user_answer_clean}
+
+Context (supporting text): {question.citation.content if question.citation else 'No context available.'}
+
+Provide a short explanation (2-3 sentences): first explain why the student's selected option is incorrect, then explain why the correct answer is correct. Be concise and educational."""
+
+                try:
+                    feedback_text = self.ollama.generate(prompt=explain_prompt, temperature=0.3)
+                    feedback = feedback_text.strip()
+                except Exception as e:
+                    logger.warning(f"LLM feedback generation failed for MCQ: {e}")
+                    feedback = f"Incorrect. The correct answer is: {correct_answer_clean}."
                 grade = "F"
         
         elif question.type == QuestionType.TRUE_FALSE:
@@ -317,7 +336,22 @@ Only output valid JSON, nothing else."""
                 feedback = "Correct!"
                 grade = "A"
             else:
-                feedback = f"Incorrect. The correct answer is: {correct_answer_clean}"
+                # Provide a brief explanation for the true/false statement.
+                explain_prompt = f"""A student answered a True/False question incorrectly.
+
+Statement: {question.question}
+Correct Answer: {correct_answer_clean}
+Student Answer: {user_answer_clean}
+
+Context (supporting text): {question.citation.content if question.citation else 'No context available.'}
+
+Provide a short explanation (1-2 sentences) explaining why the statement is {correct_answer_clean} and why the student's answer was incorrect."""
+                try:
+                    feedback_text = self.ollama.generate(prompt=explain_prompt, temperature=0.3)
+                    feedback = feedback_text.strip()
+                except Exception as e:
+                    logger.warning(f"LLM feedback generation failed for T/F: {e}")
+                    feedback = f"Incorrect. The correct answer is: {correct_answer_clean}."
                 grade = "F"
         
         elif question.type == QuestionType.OPEN_ENDED:
@@ -367,6 +401,8 @@ Provide brief, constructive feedback (2-3 sentences) on the student's answer."""
         
         return AnswerFeedback(
             question_id=question.id,
+            question=question.question,  # Include question text in feedback
+            question_type=question.type,  # Include question type
             is_correct=is_correct,
             user_answer=user_answer_clean,
             correct_answer=correct_answer_clean,

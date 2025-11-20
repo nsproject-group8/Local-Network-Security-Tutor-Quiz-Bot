@@ -27,7 +27,7 @@ function App() {
       }}>
         <div className="container">
           <h1 style={{ fontSize: '1.5rem', fontWeight: 'bold', marginBottom: '0.5rem' }}>
-            🔐 Network Security Tutor & Quiz Bot
+            Network Security Tutor & Quiz Bot
           </h1>
           <p style={{ fontSize: '0.875rem', color: '#9ca3af' }}>
             Privacy-Preserving AI-Powered Learning Assistant

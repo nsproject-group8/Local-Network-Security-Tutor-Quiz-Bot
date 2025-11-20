@@ -32,7 +32,6 @@ PY
 
 # Copy backend code
 COPY backend /app/backend
-COPY .env /app/.env
 
 ENV PYTHONPATH=/app/backend
 

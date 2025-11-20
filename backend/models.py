@@ -61,6 +61,8 @@ class AnswerSubmission(BaseModel):
 
 class AnswerFeedback(BaseModel):
     question_id: str
+    question: str  # Include the question text for feedback display
+    question_type: QuestionType  # Include question type
     is_correct: bool
     user_answer: str
     correct_answer: str

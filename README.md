@@ -411,7 +411,7 @@ Prerequisites:
 # From project root
 docker compose pull        # (optional) pull images like the Ollama image
 docker compose build       # build backend/frontend images (backend image includes pre-baked embedding model)
-docker compose up -d       # start all services (frontend, backend, ollama)
+docker compose up -d --build       # start all services (frontend, backend, ollama). '--build' ensures images are rebuilt when needed.
 ```
 
 2) Pull / preload the Ollama model (one-time, large download)
