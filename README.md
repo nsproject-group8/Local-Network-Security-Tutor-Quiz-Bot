@@ -1,68 +1,69 @@
-# 🔐 Network Security Tutor & Quiz Bot
+# Network Security Tutor & Quiz Bot
 
-A privacy-preserving, AI-powered intelligent tutor system for network security education. Built with React, Python, ChromaDB, and Ollama (Llama 3.2 3B).
+## Overview
+This project is a privacy-preserving, production-ready tutor and quiz bot for network security courses. It features:
+- Q&A agent with citations and web search
+- Quiz generation and automated grading
+- Local document processing and embedding
+- Security features: encryption, audit logging, network monitoring
+- Modern React frontend and FastAPI backend
 
-## 🌟 Features
+## Features
+- Ask questions and get cited answers from uploaded documents
+- Generate quizzes (MCQ, True/False, Open-ended) on any topic
+- Upload and ingest PDF, DOCX, PPTX, TXT, and Markdown files
+- Automated grading and feedback
+- All data processed locally for privacy
+- Security: encryption, audit logging, network monitoring
 
-### Core Agents
+## Production Setup (Docker)
 
-#### 1. **Q&A Tutor Agent**
-- ✅ Answers network security questions using RAG (Retrieval-Augmented Generation)
-- ✅ Provides citations from local documents
-- ✅ Optional web search integration with source attribution
-- ✅ Semantic search with ChromaDB vector database
-- ✅ Context-aware responses using Llama 3.2 3B
+### Prerequisites
+- Docker and Docker Compose installed
+- (Optional) Ollama installed for local LLM
 
-#### 2. **Quiz Agent**
-- ✅ Generates multiple-choice questions (MCQ)
-- ✅ Generates true/false questions
-- ✅ Generates open-ended questions
-- ✅ Random quiz mode
-- ✅ Topic-specific quiz mode
-- ✅ Automated grading with detailed feedback
-- ✅ Semantic similarity scoring for open-ended answers
-- ✅ Citation-backed feedback
+### Quick Start
+1. Clone the repository:
+  ```bash
+  git clone <repo-url>
+  cd chat-ver-1
+  ```
+2. Build and start all services:
+  ```bash
+  docker-compose up --build
+  ```
+3. Access the frontend at [http://localhost:3000](http://localhost:3000)
+4. Access the backend API docs at [http://localhost:8000/docs](http://localhost:8000/docs)
 
-### 🔒 Bonus Security Features
+### Customization
+- Edit `.env` for environment variables (see sample in README)
+- To use a custom Ollama model, update `OLLAMA_MODEL` in `.env` and ensure the model is pulled
 
-- **Data Encryption**: All sensitive data encrypted at rest using Fernet encryption
-- **Audit Logging**: Comprehensive logging of all data access and modifications
-- **Network Monitoring**: Track and verify local-only operation
-- **Privacy-First**: All processing happens locally - no external API calls for sensitive data
-
-## 🏗️ Architecture
-
+### Stopping Services
+```bash
+docker-compose down
 ```
-┌─────────────────┐
-│  React Frontend │  (Port 3000)
-│  - Q&A Interface│
-│  - Quiz System  │
-│  - Doc Upload   │
-└────────┬────────┘
-         │
-         │ HTTP/REST API
-         ▼
-┌─────────────────────────────────────────┐
-│         FastAPI Backend (Port 8000)      │
-├─────────────────────────────────────────┤
-│  ┌──────────────┐    ┌──────────────┐  │
-│  │ Q&A Agent    │    │ Quiz Agent   │  │
-│  └──────┬───────┘    └──────┬───────┘  │
-│         │                   │           │
-│         └───────┬───────────┘           │
-│                 ▼                        │
-│  ┌─────────────────────────────────┐   │
-│  │    Embedding Service             │   │
-│  │    (sentence-transformers)       │   │
-│  └─────────────┬───────────────────┘   │
-│                │                        │
-│    ┌───────────┴───────────┐           │
-│    ▼                       ▼           │
-│ ┌─────────┐          ┌──────────┐     │
-│ │ChromaDB │          │ Ollama   │     │
-│ │Vector DB│          │ Llama3.2 │     │
-│ └─────────┘          └──────────┘     │
-└─────────────────────────────────────────┘
+
+## Folder Structure
+```
+chat-ver-1/
+├── backend/         # FastAPI backend
+├── frontend/        # React frontend
+├── data/            # Documents, uploads, ChromaDB
+├── logs/            # Application logs
+├── requirements.txt # Python dependencies
+├── docker-compose.yml
+├── README.md        # Unified documentation
+```
+
+## Troubleshooting
+- Ensure Docker is running
+- Check logs in `logs/` for errors
+- Make sure Ollama is running and model is available
+- For API issues, check `/health` endpoint
+
+## License
+MIT
 ```
 
 ## 📋 Prerequisites
@@ -530,3 +531,14 @@ For questions or issues, please open a GitHub issue or contact the development t
 **Built with ❤️ for Network Security Education**
 
 *Privacy-First • Locally-Powered • AI-Enhanced*
+
+**Docker-Commands**
+
+docker compose build frontend
+docker compose build backend
+docker compose up -d --build
+docker compose ps
+docker compose logs --tail 200 backend frontend ollama
+curl -sS http://localhost:8000/health
+
+

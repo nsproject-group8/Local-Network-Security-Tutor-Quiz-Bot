@@ -3,6 +3,7 @@ import { Send, FileText, ExternalLink } from 'lucide-react';
 import { qaAPI } from '../api/api';
 import ReactMarkdown from 'react-markdown';
 
+// QATutor: Component for submitting questions and displaying answers with citations
 function QATutor() {
   const [question, setQuestion] = useState('');
   const [loading, setLoading] = useState(false);

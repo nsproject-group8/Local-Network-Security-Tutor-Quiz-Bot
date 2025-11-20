@@ -1,3 +1,5 @@
+// Main application component for Network Security Tutor & Quiz Bot
+// Handles tab navigation and layout, imports all main feature components
 import React, { useState } from 'react';
 import { MessageSquare, BookOpen, Upload, Home } from 'lucide-react';
 import QATutor from './components/QATutor';
@@ -6,6 +8,7 @@ import DocumentUpload from './components/DocumentUpload';
 import Dashboard from './components/Dashboard';
 import './index.css';
 
+// App: Root component, manages navigation and renders feature tabs
 function App() {
   const [activeTab, setActiveTab] = useState('dashboard');
 

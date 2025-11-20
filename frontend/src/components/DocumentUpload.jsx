@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Upload, File, CheckCircle, XCircle, FolderOpen, Trash2 } from 'lucide-react';
 import { documentAPI } from '../api/api';
 
+// DocumentUpload: Handles file selection, upload, and document ingestion
 function DocumentUpload() {
   const [selectedFiles, setSelectedFiles] = useState([]);
   const [uploading, setUploading] = useState(false);

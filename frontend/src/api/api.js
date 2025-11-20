@@ -1,3 +1,4 @@
+// API client for communicating with FastAPI backend
 import axios from 'axios';
 
 // Use an explicit VITE_API_URL when provided (for dev or remote deployments).
@@ -13,7 +14,7 @@ const api = axios.create({
   },
 });
 
-// Q&A Tutor API
+// Q&A Tutor API: Handles question submission and answer retrieval
 export const qaAPI = {
   askQuestion: async (question) => {
     const response = await api.post('/api/qa/ask', {
@@ -23,7 +24,7 @@ export const qaAPI = {
   },
 };
 
-// Quiz API
+// Quiz API: Handles quiz generation and grading
 export const quizAPI = {
   generateQuiz: async (mode, topic = null, numQuestions = 5, questionTypes = null) => {
     const response = await api.post('/api/quiz/generate', {
@@ -41,7 +42,7 @@ export const quizAPI = {
   },
 };
 
-// Document API
+// Document API: Handles document upload and management
 export const documentAPI = {
   uploadDocument: async (file, onProgress) => {
     const formData = new FormData();

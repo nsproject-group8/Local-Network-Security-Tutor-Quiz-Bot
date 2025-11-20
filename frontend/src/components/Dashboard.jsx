@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { Activity, Database, Brain, Shield, CheckCircle, XCircle, RefreshCw, Clock } from 'lucide-react';
 import { healthAPI, documentAPI } from '../api/api';
 
+// Dashboard: Displays system health, document count, and status cards
 function Dashboard() {
   const [health, setHealth] = useState(null);
   const [docCount, setDocCount] = useState(0);

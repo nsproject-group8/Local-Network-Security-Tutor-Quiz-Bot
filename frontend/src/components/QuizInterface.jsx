@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Play, CheckCircle, XCircle, Award, RotateCcw } from 'lucide-react';
 import { quizAPI } from '../api/api';
 
+// QuizInterface: Manages quiz configuration, question display, answer input, grading, and results
 function QuizInterface() {
   const [quizConfig, setQuizConfig] = useState({
     mode: 'random',
