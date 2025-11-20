@@ -10,12 +10,22 @@ from loguru import logger
 from config import settings
 
 class DocumentProcessor:
+    """
+    Process various document formats for ingestion into the vector database.
+    Supports PDF, DOCX, PPTX, TXT, and Markdown files.
+    """
     """Process various document formats for ingestion into the vector database."""
     
     def __init__(self):
+        """
+        Initialize DocumentProcessor with supported file extensions.
+        """
         self.supported_extensions = {'.pdf', '.docx', '.pptx', '.txt', '.md'}
     
     def process_pdf(self, file_path: str) -> List[Dict[str, Any]]:
+        """
+        Extract text from PDF file and return as chunks with metadata.
+        """
         """Extract text from PDF file."""
         chunks = []
         try:
@@ -41,6 +51,9 @@ class DocumentProcessor:
         return chunks
     
     def process_docx(self, file_path: str) -> List[Dict[str, Any]]:
+        """
+        Extract text from DOCX file and return as chunks with metadata.
+        """
         """Extract text from DOCX file."""
         chunks = []
         try:

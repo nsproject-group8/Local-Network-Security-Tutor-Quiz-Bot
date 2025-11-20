@@ -22,14 +22,24 @@ class QuizAgent:
     Quiz Agent - Generates and grades quizzes.
     Supports multiple question types and grading with citations.
     """
+    """
+    Quiz Agent - Generates and grades quizzes.
+    Supports multiple question types and grading with citations.
+    """
     
     def __init__(self):
+        """
+        Initialize QuizAgent with ChromaDB, Ollama, and Embedding services.
+        """
         self.chroma = chroma_service
         self.ollama = ollama_service
         self.embedding = embedding_service
         self.active_quizzes: Dict[str, QuizResponse] = {}
     
     def _extract_topic_documents(self, topic: Optional[str] = None) -> List[Dict]:
+        """
+        Extract documents relevant to a specific topic or all documents.
+        """
         """Extract documents relevant to a specific topic or all documents."""
         if topic:
             results = self.chroma.query_similar(

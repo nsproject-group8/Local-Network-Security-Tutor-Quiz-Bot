@@ -10,7 +10,14 @@ from collections import OrderedDict
 import time
 
 class EmbeddingService:
+    """
+    Service for generating text embeddings using Sentence Transformers.
+    Provides methods for embedding text and managing ChromaDB.
+    """
     def __init__(self):
+        """
+        Initialize the embedding service with sentence transformers.
+        """
         """Initialize the embedding service with sentence transformers."""
         # Defer heavy model loading until first use so the application can start
         # quickly. Loading at import time blocks the FastAPI startup when the
@@ -40,6 +47,9 @@ class EmbeddingService:
         t.start()
 
     def ensure_model_loaded(self):
+        """
+        Load the SentenceTransformer model if it hasn't been loaded yet.
+        """
         """Load the SentenceTransformer model if it hasn't been loaded yet."""
         if self.model is None:
             logger.info(f"Loading embedding model: {self.model_name}")
@@ -52,6 +62,9 @@ class EmbeddingService:
             logger.info(f"Embedding model loaded. Dimension: {self.dimension}")
     
     def embed_text(self, text: str) -> List[float]:
+        """
+        Generate embeddings for a single text.
+        """
         """Generate embeddings for a single text."""
         # Check cache first
         if text in self._cache:

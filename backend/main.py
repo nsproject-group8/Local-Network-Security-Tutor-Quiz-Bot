@@ -1,3 +1,8 @@
+"""
+Main FastAPI application for Network Security Tutor & Quiz Bot.
+Defines API endpoints for Q&A, quiz, document management, and health checks.
+Initializes services, configures CORS, and logging.
+"""
 from fastapi import FastAPI, UploadFile, File, HTTPException, BackgroundTasks
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
@@ -24,6 +29,7 @@ app = FastAPI(
     title=settings.APP_NAME,
     description="Privacy-Preserving Network Security Tutor & Quiz Bot",
     version="1.0.0"
+    # FastAPI app initialization with project metadata
 )
 
 # Configure CORS
@@ -33,6 +39,7 @@ app.add_middleware(
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
+    # CORS configuration for frontend communication
 )
 
 # Configure logging
@@ -41,6 +48,7 @@ logger.add(
     rotation="500 MB",
     retention="10 days",
     level="INFO"
+    # Logging configuration for application events
 )
 
 # Create necessary directories
@@ -48,10 +56,15 @@ os.makedirs(settings.DOCUMENTS_PATH, exist_ok=True)
 os.makedirs(settings.UPLOAD_PATH, exist_ok=True)
 os.makedirs(settings.LOGS_PATH, exist_ok=True)
 os.makedirs(settings.CHROMA_DB_PATH, exist_ok=True)
+    # Create necessary directories for document management
 
 @app.on_event("startup")
 async def startup_event():
     """Initialize services on startup."""
+    """
+    FastAPI startup event handler.
+    Initializes services and checks Ollama availability.
+    """
     logger.info("Starting Network Security Tutor Bot...")
     
     # Check Ollama availability
@@ -64,6 +77,9 @@ async def startup_event():
 @app.get("/")
 async def root():
     """Root endpoint."""
+    """
+    Root endpoint for API. Returns basic info and docs link.
+    """
     return {
         "message": "Network Security Tutor & Quiz Bot API",
         "version": "1.0.0",
@@ -73,6 +89,10 @@ async def root():
 @app.get("/health", response_model=HealthResponse)
 async def health_check():
     """Health check endpoint."""
+    """
+    Health check endpoint.
+    Returns the status of the application and service availability.
+    """
     ollama_available = ollama_service.check_availability()
     chroma_initialized = chroma_service.count_documents() >= 0
     documents_count = chroma_service.count_documents()
@@ -97,6 +117,10 @@ async def ask_question(request: QuestionRequest):
     
     - **question**: The question to ask
     """
+    """
+    Endpoint for asking questions to the Q&A Tutor Agent.
+    Processes the request and returns the answer.
+    """
     try:
         logger.info(f"Received question: {request.question}")
         response = qa_tutor_agent.answer_question(request)
@@ -119,6 +143,10 @@ async def generate_quiz(request: QuizGenerationRequest):
     - **num_questions**: Number of questions to generate
     - **question_types**: Types of questions to include
     """
+    """
+    Endpoint for generating a new quiz.
+    Accepts quiz parameters and returns the generated quiz.
+    """
     try:
         logger.info(f"Generating quiz: {request}")
         quiz = quiz_agent.generate_quiz(request)
@@ -134,6 +162,10 @@ async def grade_quiz(quiz_id: str, submissions: List[AnswerSubmission]):
     
     - **quiz_id**: The ID of the quiz to grade
     - **submissions**: List of answer submissions
+    """
+    """
+    Endpoint for grading a quiz submission.
+    Accepts quiz ID and submissions, returns grading results.
     """
     try:
         logger.info(f"Grading quiz: {quiz_id}")
@@ -158,6 +190,10 @@ async def upload_document(
     Upload a document to be indexed.
     
     Supported formats: PDF, DOCX, PPTX, TXT, MD
+    """
+    """
+    Endpoint for uploading documents to be indexed.
+    Validates file type and processes the document.
     """
     try:
         # Validate file type
@@ -212,6 +248,10 @@ async def ingest_directory(directory_path: str = None):
     
     - **directory_path**: Path to directory (defaults to DOCUMENTS_PATH)
     """
+    """
+    Endpoint for ingesting all documents from a specified directory.
+    Processes and indexes documents found in the directory.
+    """
     try:
         path = directory_path or settings.DOCUMENTS_PATH
         
@@ -250,6 +290,10 @@ async def ingest_directory(directory_path: str = None):
 @app.get("/api/documents/count")
 async def get_document_count():
     """Get the number of indexed documents."""
+    """
+    Endpoint for retrieving the count of indexed documents.
+    Returns the total number of documents in the database.
+    """
     try:
         count = chroma_service.count_documents()
         return {"total_documents": count}
@@ -260,6 +304,10 @@ async def get_document_count():
 @app.delete("/api/documents/clear")
 async def clear_documents():
     """Clear all indexed documents (use with caution)."""
+    """
+    Endpoint for clearing all indexed documents.
+    Use with caution as this will delete all documents.
+    """
     try:
         chroma_service.delete_all()
         logger.warning("All documents cleared from database")

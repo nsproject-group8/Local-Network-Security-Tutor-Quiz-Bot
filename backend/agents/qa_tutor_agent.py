@@ -14,12 +14,22 @@ class QATutorAgent:
     Q&A Tutor Agent - Answers course questions with citations.
     Retrieves relevant context from local database and optionally from web.
     """
+    """
+    Q&A Tutor Agent - Answers course questions with citations.
+    Retrieves relevant context from local database and optionally from web.
+    """
     
     def __init__(self):
+        """
+        Initialize QATutorAgent with ChromaDB and Ollama services.
+        """
         self.chroma = chroma_service
         self.ollama = ollama_service
     
     def _create_citation(
+        """
+        Create a citation object from search results.
+        """
         self,
         source: str,
         content: str,
@@ -36,6 +46,10 @@ class QATutorAgent:
         )
     
     def _check_relevance_to_network_security(self, question: str) -> tuple[bool, float]:
+        """
+        Check if the question is related to network security.
+        Returns (is_relevant, confidence_score)
+        """
         """
         Check if the question is related to network security.
         Returns (is_relevant, confidence_score)

@@ -4,15 +4,24 @@ from datetime import datetime
 from enum import Enum
 
 class QuestionType(str, Enum):
+    """
+    Enum for supported question types in quizzes.
+    """
     MULTIPLE_CHOICE = "multiple_choice"
     TRUE_FALSE = "true_false"
     OPEN_ENDED = "open_ended"
 
 class QuizMode(str, Enum):
+    """
+    Enum for quiz generation modes.
+    """
     RANDOM = "random"
     TOPIC_SPECIFIC = "topic_specific"
 
 class Citation(BaseModel):
+    """
+    Model for citation metadata attached to answers and questions.
+    """
     source: str
     content: str
     page: Optional[int] = None
@@ -20,9 +29,15 @@ class Citation(BaseModel):
     confidence: float = 0.0
 
 class QuestionRequest(BaseModel):
+    """
+    Request model for submitting a question to the Q&A agent.
+    """
     question: str
 
 class QuestionResponse(BaseModel):
+    """
+    Response model for answers from the Q&A agent, including citations and confidence.
+    """
     question: str
     answer: str
     citations: List[Citation]
@@ -30,6 +45,9 @@ class QuestionResponse(BaseModel):
     timestamp: datetime = Field(default_factory=datetime.now)
 
 class QuizGenerationRequest(BaseModel):
+    """
+    Request model for generating a quiz, specifying mode, topic, and question types.
+    """
     mode: QuizMode
     topic: Optional[str] = None
     num_questions: int = 5
@@ -40,6 +58,9 @@ class QuizGenerationRequest(BaseModel):
     ]
 
 class QuizQuestion(BaseModel):
+    """
+    Model for individual quiz questions, including type, options, and citation.
+    """
     id: str
     type: QuestionType
     question: str
@@ -50,11 +71,17 @@ class QuizQuestion(BaseModel):
     citation: Optional[Citation] = None
 
 class QuizResponse(BaseModel):
+    """
+    Response model for a generated quiz, including questions and metadata.
+    """
     quiz_id: str
     questions: List[QuizQuestion]
     generated_at: datetime = Field(default_factory=datetime.now)
 
 class AnswerSubmission(BaseModel):
+    """
+    Model for submitting answers to quiz questions.
+    """
     quiz_id: str
     question_id: str
     user_answer: str

@@ -7,7 +7,14 @@ import threading
 import time
 
 class OllamaService:
+    """
+    Service for interacting with the Ollama LLM backend.
+    Handles model availability checks and text generation.
+    """
     def __init__(self):
+        """
+        Initialize Ollama client and model settings.
+        """
         """Initialize Ollama client."""
         self.client = ollama.Client(host=settings.OLLAMA_BASE_URL)
         self.model = settings.OLLAMA_MODEL
@@ -19,6 +26,9 @@ class OllamaService:
         self._lock = threading.Lock()
     
     def check_availability(self) -> bool:
+        """
+        Check if Ollama is available and the model is pulled.
+        """
         """Check if Ollama is available and the model is pulled."""
         try:
             models_response = self.client.list()
@@ -54,6 +64,9 @@ class OllamaService:
             return False
     
     def generate(
+        """
+        Generate text using the Ollama LLM model.
+        """
         self,
         prompt: str,
         system_prompt: Optional[str] = None,

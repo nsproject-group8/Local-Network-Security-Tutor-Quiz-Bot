@@ -4,12 +4,27 @@ from loguru import logger
 import re
 
 class WebSearchService:
+    """
+    Service for performing web searches to supplement local knowledge.
+    Integrates DuckDuckGo search for additional context.
+    """
     """Service for performing web searches to supplement local knowledge."""
     
     def __init__(self):
+        """
+        Initialize DuckDuckGo search client.
+        """
         self.ddgs = DDGS()
     
     def search(self, query: str, max_results: int = 3) -> List[Dict[str, Any]]:
+        """
+        Perform a web search and return results.
+        Args:
+            query: Search query
+            max_results: Maximum number of results to return
+        Returns:
+            List of search results with title, snippet, and URL
+        """
         """
         Perform a web search and return results.
         
@@ -40,6 +55,13 @@ class WebSearchService:
             return []
     
     def enhance_query(self, query: str) -> str:
+        """
+        Enhance the query with network security context for better web results.
+        Args:
+            query: Original user query
+        Returns:
+            Enhanced query string
+        """
         """
         Enhance the query with network security context for better web results.
         
