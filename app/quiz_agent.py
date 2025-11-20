@@ -286,7 +286,8 @@ def llama_generate_question(context, qtype="MCQ"):
     """Generate one question (MCQ, TrueFalse, or FillBlank) using Ollama."""
     if qtype == "MCQ":
         instruction = """
-        Create ONE multiple-choice question (MCQ) based ONLY on the given text.
+        Create ONE conceptual multiple-choice question (MCQ) based ONLY on the given text.
+        Focus on understanding (what/why/how) rather than asking about section numbers or page references.
         Give 4 unique, realistic options and mark the correct one.
         Return JSON:
         {
@@ -299,7 +300,7 @@ def llama_generate_question(context, qtype="MCQ"):
         """
     elif qtype == "TrueFalse":
         instruction = """
-        Create ONE True/False question based on the text.
+        Create ONE conceptual True/False question based on the text that tests comprehension instead of referencing sections/figures.
         Return JSON:
         {
           "type": "TrueFalse",
@@ -504,8 +505,10 @@ def llama_generate_question(context, qtype="MCQ"):
     """Generate one question (MCQ, TrueFalse, or FillBlank) using Ollama (Mistral model)."""
     if qtype == "MCQ":
         instruction = """
-        Create ONE multiple-choice question (MCQ) based ONLY on the given text.
-        Give 4 unique, realistic options and mark the correct one.
+        Create ONE conceptual multiple-choice question (MCQ) based ONLY on the given text.
+        Focus on concrete network security concepts (what/why/how) stated in the text rather than asking about section/page numbers, book structure, author intent, or learning styles.
+        Ignore any course logistics or publishing metadata in the context unless it directly explains a security mechanism.
+        Give 4 unique, realistic options and mark the correct one. The correct answer must be directly supported by the context.
         Return JSON:
         {
           "type": "MCQ",
@@ -517,7 +520,8 @@ def llama_generate_question(context, qtype="MCQ"):
         """
     elif qtype == "TrueFalse":
         instruction = """
-        Create ONE True/False question based on the text.
+        Create ONE conceptual True/False question based on the text that tests comprehension instead of referencing sections/figures, author intentions, book layouts, or website logistics.
+        Ignore non-technical metadata. The statement must be directly verifiable from the provided context.
         Return JSON:
         {
           "type": "TrueFalse",
@@ -635,6 +639,9 @@ model = SentenceTransformer("all-MiniLM-L6-v2")
 client = chromadb.PersistentClient(path="embeddings")
 collection = client.get_or_create_collection("network_security")
 
+# Use the same local Llama variant as the tutor unless overridden via env.
+QUIZ_MODEL = os.environ.get("QUIZ_MODEL", "llama3.2:3b")
+
 # ---------- Grading ----------
 def grade_answer(user_ans, correct_ans, context_text=None, question_text=None):
     """Compare user answer vs correct answer, return result + score."""
@@ -661,7 +668,7 @@ def grade_answer(user_ans, correct_ans, context_text=None, question_text=None):
             In one short line, explain why the correct answer is right.
             """
             r = ollama.generate(
-                model="llama3.2",
+                model=QUIZ_MODEL,
                 prompt=prompt,
                 options={"num_predict": 256, "temperature": 0.7}
             )
@@ -717,7 +724,8 @@ def llama_generate_question(context, qtype="MCQ"):
     """Generate one question (MCQ, TrueFalse, or OpenEnded) using Ollama."""
     if qtype == "MCQ":
         instruction = """
-        Create ONE multiple-choice question (MCQ) based ONLY on the given text.
+        Create ONE conceptual multiple-choice question (MCQ) based ONLY on the given text.
+        Focus on understanding (what/why/how) rather than asking about section or page numbers.
         Give 4 unique, realistic options and mark the correct one.
         Return JSON:
         {
@@ -730,7 +738,7 @@ def llama_generate_question(context, qtype="MCQ"):
         """
     elif qtype == "TrueFalse":
         instruction = """
-        Create ONE True/False question based on the text.
+        Create ONE conceptual True/False question based on the text that tests comprehension instead of referencing sections/figures.
         Return JSON:
         {
           "type": "TrueFalse",
@@ -740,10 +748,10 @@ def llama_generate_question(context, qtype="MCQ"):
           "explanation": "..."
         }
         """
-  
     else:  # OpenEnded
         instruction = """
-        Create ONE short open-ended question that asks the student to explain or describe a key concept from the text.
+        Create ONE short open-ended question that asks the student to explain or describe a key network security concept from the text.
+        The question must be answerable purely from the provided context and must not reference section/page numbers, author motivations, learning processes, or other publishing details.
         Return JSON:
         {
           "type": "OpenEnded",
@@ -758,6 +766,15 @@ def llama_generate_question(context, qtype="MCQ"):
 You are a professional Network Security quiz generator.
 Generate a {qtype} question using ONLY the following context.
 Avoid figure numbers, lecture numbers, or irrelevant details.
+Ask conceptual, explainable questions (what/why/how) that can be answered without referencing section numbers, slide numbers, or page locations.
+Do NOT ask "what is in section X" style questions.
+Ensure every question and answer pair is explicitly grounded in the supplied context. Do not ask about the author's intentions, teaching style, or anything not stated verbatim in the text.
+
+Requirements:
+- The answer must be deducible directly from the context snippet.
+- Avoid meta-level, publisher, or study-guide questions (e.g., "How does the author approach teaching?", "What is covered in Part Two?").
+- Ignore companion-website logistics unless the context explicitly ties them to a security concept.
+- Keep wording concrete and specific to the technical ideas described (threats, mitigations, protocols, properties, trade-offs, etc.).
 
 Context:
 {context[:512]}
@@ -767,7 +784,7 @@ Context:
 
     try:
         r = ollama.generate(
-            model="llama3.2",
+            model=QUIZ_MODEL,
             prompt=prompt,
             options={"num_predict":512, "temperature": 0.7}
         )
@@ -779,7 +796,7 @@ Context:
         try:
             strict_prompt = prompt + "\nReturn ONLY valid JSON, no explanation, no prose."
             r2 = ollama.generate(
-                model="llama3.2",
+                model=QUIZ_MODEL,
                 prompt=strict_prompt,
                 options={"num_predict": 512, "temperature": 0.7}
             )

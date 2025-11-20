@@ -145,7 +145,6 @@ if __name__ == "__main__":
         ("Lectures", "lecture_slide"),
         ("Lectures_text", "lecture_slide_Formatted"),
         ("textbooks", "textbook"),
-        ("internet_sources", "internet_source"),
         ("Assignments", "assignment"),
         ("Quizzes", "quiz"),
     ]
