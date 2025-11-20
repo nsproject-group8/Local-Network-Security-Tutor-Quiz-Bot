@@ -1,3 +1,0 @@
-Network security involves the processes and practices used to protect networked systems from unauthorized access, misuse, or theft. 
-The primary goals are confidentiality, integrity, and availability of data. 
-It includes the implementation of firewalls, encryption, and intrusion prevention systems.

@@ -1,3 +1,0 @@
-Common cyber threats include malware, phishing, ransomware, and denial-of-service attacks. 
-Effective prevention includes employee training, updated antivirus software, and proper network monitoring. 
-Regular software patching reduces vulnerabilities that attackers may exploit.

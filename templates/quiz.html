@@ -70,7 +70,7 @@
       <input type="hidden" name="correct_{{ i }}" value="{{ q['answer'] }}">
       <input type="hidden" name="question_text_{{ i }}" value="{{ q['question'] }}">
       <input type="hidden" name="context_{{ i }}" value="{{ q['explanation'] }}">
-      <p class="text-muted mt-2"><strong>📚 Source:</strong> {{ q['source'] }}</p>
+      <input type="hidden" name="source_{{ i }}" value="{{ q['source'] }}">
     </div>
   {% endfor %}
 
@@ -91,6 +91,12 @@
     <p><strong>Your Answer:</strong> {{ r[1] }}</p>
     <p><strong>Correct Answer:</strong> {{ r[2] }}</p>
     <p>{{ r[3] }}</p>
+    {% if r[5] %}
+      <p><strong>Explanation:</strong> {{ r[5] }}</p>
+    {% endif %}
+    {% if r[6] %}
+      <p class="text-muted"><strong>📚 Source:</strong> {{ r[6] }}</p>
+    {% endif %}
   </div>
   <hr>
   {% endfor %}

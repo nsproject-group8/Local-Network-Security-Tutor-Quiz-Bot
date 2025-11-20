@@ -1,19 +1,153 @@
 {% extends "base.html" %}
 {% block content %}
 <h3>🧠 AI Tutor</h3>
-<form method="POST" class="mb-3">
+<form method="POST" class="mb-3" id="tutor-form">
   <div class="input-group">
     <input type="text" class="form-control" name="question" placeholder="Ask a question..." required />
     <button class="btn btn-primary" type="submit">Ask</button>
   </div>
 </form>
 
-{% if question %}
-<div class="card p-3">
-  <strong>Q:</strong> {{ question }}
+<div id="tutor-error" class="alert alert-danger d-none"></div>
+
+<div class="card p-3 d-none" id="tutor-response">
+  <strong>Q:</strong> <span id="question-text"></span>
   <hr>
-  <pre style="white-space:pre-wrap;">{{ answer }}</pre>
-  <p><strong>📚 Sources:</strong><br>{{ sources }}</p>
+  <pre style="white-space:pre-wrap;" id="answer-text"></pre>
+  <div id="sources-wrapper" class="mt-3 d-none">
+    <p><strong>📚 Sources:</strong><br><span id="sources-text"></span></p>
+  </div>
 </div>
-{% endif %}
+
+<script>
+  (function () {
+    const form = document.getElementById('tutor-form');
+    if (!form) return;
+
+    const initialQuestion = {{ (question|default('', true))|tojson }};
+    const initialAnswer = {{ (answer|default('', true))|tojson }};
+    const initialSources = {{ (sources|default('', true))|tojson }};
+    const initialShowSources = {{ (show_sources|default(False))|tojson }};
+
+    const answerBox = document.getElementById('answer-text');
+    const sourcesBox = document.getElementById('sources-text');
+    const questionText = document.getElementById('question-text');
+    const responseCard = document.getElementById('tutor-response');
+    const sourcesWrapper = document.getElementById('sources-wrapper');
+    const errorBox = document.getElementById('tutor-error');
+    const submitButton = form.querySelector('button[type="submit"]');
+    const streamUrl = "{{ url_for('tutor_stream') }}";
+    let allowSources = Boolean(initialShowSources);
+
+    const refreshSourcesVisibility = () => {
+      if (!sourcesWrapper) return;
+      if (allowSources && sourcesBox.textContent.trim()) {
+        sourcesWrapper.classList.remove('d-none');
+      } else {
+        sourcesWrapper.classList.add('d-none');
+      }
+    };
+
+    if (initialQuestion) {
+      questionText.textContent = initialQuestion;
+      answerBox.textContent = initialAnswer;
+      sourcesBox.textContent = initialSources;
+      responseCard.classList.remove('d-none');
+      refreshSourcesVisibility();
+    }
+
+    form.addEventListener('submit', async (event) => {
+      event.preventDefault();
+      const formData = new FormData(form);
+      const question = (formData.get('question') || '').trim();
+      if (!question) {
+        return;
+      }
+
+      answerBox.textContent = '';
+      sourcesBox.textContent = '';
+      questionText.textContent = question;
+      responseCard.classList.remove('d-none');
+      errorBox.classList.add('d-none');
+      errorBox.textContent = '';
+      allowSources = false;
+      refreshSourcesVisibility();
+
+      if (submitButton) {
+        submitButton.disabled = true;
+      }
+
+      try {
+        const response = await fetch(streamUrl, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ question })
+        });
+
+        if (!response.ok || !response.body) {
+          throw new Error('Unable to connect to tutor stream.');
+        }
+
+        const reader = response.body.getReader();
+        const decoder = new TextDecoder();
+        let buffer = '';
+
+        while (true) {
+          const { value, done } = await reader.read();
+          if (done) break;
+          buffer += decoder.decode(value, { stream: true });
+
+          let newlineIndex;
+          while ((newlineIndex = buffer.indexOf('\n')) !== -1) {
+            const line = buffer.slice(0, newlineIndex).trim();
+            buffer = buffer.slice(newlineIndex + 1);
+            if (!line) continue;
+            try {
+              const payload = JSON.parse(line);
+              if (payload.type === 'meta') {
+                allowSources = Boolean(payload.show_sources);
+                refreshSourcesVisibility();
+              } else if (payload.type === 'chunk') {
+                answerBox.textContent += payload.text;
+              } else if (payload.type === 'sources') {
+                if (allowSources) {
+                  sourcesBox.textContent = payload.text;
+                  refreshSourcesVisibility();
+                }
+              } else if (payload.type === 'error') {
+                throw new Error(payload.text || 'Streaming error.');
+              }
+            } catch (err) {
+              console.error('Stream parse error:', err);
+            }
+          }
+        }
+
+        buffer += decoder.decode();
+        if (buffer.trim()) {
+          try {
+            const payload = JSON.parse(buffer.trim());
+            if (payload.type === 'sources') {
+              if (allowSources) {
+                sourcesBox.textContent = payload.text;
+                refreshSourcesVisibility();
+              }
+            } else if (payload.type === 'chunk') {
+              answerBox.textContent += payload.text;
+            }
+          } catch (err) {
+            console.error('Stream parse error at end:', err);
+          }
+        }
+      } catch (err) {
+        errorBox.textContent = err.message || 'Something went wrong.';
+        errorBox.classList.remove('d-none');
+      } finally {
+        if (submitButton) {
+          submitButton.disabled = false;
+        }
+      }
+    });
+  })();
+</script>
 {% endblock %}

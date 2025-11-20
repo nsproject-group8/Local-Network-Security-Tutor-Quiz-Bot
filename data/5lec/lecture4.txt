@@ -1,3 +1,0 @@
-Firewalls act as a barrier between trusted and untrusted networks. 
-They monitor and control incoming and outgoing network traffic based on predefined rules. 
-Modern firewalls include packet filtering, proxy service, and stateful inspection.

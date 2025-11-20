@@ -1,3 +1,0 @@
-Authentication verifies the identity of a user before granting access. 
-Authorization determines what resources the authenticated user can access. 
-Multi-factor authentication (MFA) adds additional layers of security using OTPs or biometric checks.

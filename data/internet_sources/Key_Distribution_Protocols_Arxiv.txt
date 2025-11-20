@@ -1,1794 +1,0 @@
-Key Distribution Protocols Based on Extractors Under the
-Condition of Noisy Channels in the Presence of an Active Adversary
-Viktor Yakovlev, Valery Korzhik, Guillermo Morales-Luna and Mihail Bakaevy
-November 13, 2021
-Abstract
-We consider in this paper the information-theoretic secure key distribution problem over
-main and wire-tap noise channels with a public discussion in presence of an active adversary. In
-contrast to the solution proposed by ourselves for a similar problem using hashing for privacy
-amplication, in the current paper we use a technique of extractors.
-We propose modied key distribution protocols for which we prove explicit estimates of key
-rates without the use of estimates with uncertain coecients in notations O;
-;.
-This leads in the new conclusion that the use of extractors is superior to the use of hash
-functions only with the very large key lengths `(of order`>105bits).
-We suggest hybrid key distribution protocols consisting from two consecutively executed
-stages. At the st stage it is generated a short authentication key based on hash function,
-whereas at the second stage it is generated the nal key with the use of extractors. We show
-that in fact the use of extraction procedure is eective only at the second stage. We get also
-some constructive estimates of the key rates for such protocols.
-Keywords. Authentication, cryptography, extractors, information-theoretic security, key
-distribution, privacy amplication, wire-tap channel.
-V. Yakovlev, V. Korzhik and M. Bakaev are with the Department of Information Security of Telecommunication
-Systems, State University of Telecommunication, St. Petersburg, Russia e-mail: viyak@bk.ru, korzhik1@bk.ru.
-yG. Morales-Luna is with the Computer Science Department, CINVESTAV-IPN, Mexico City, Mexico e-mail:
-gmorales@cs.cinvestav.mx. Dr. Morales-Luna acknowledges the partial support of Mexican CONACyT.
-1arXiv:1005.3184v1  [cs.IT]  18 May 20101 Introduction
-Advances in design and implementation of quantum computers [1] as well as design of super-
-fast multiprocessor conventional computers threat some conceptually secure cryptosystems. Hence
-perfect one-time pad ciphers proposed by Shannon [2] are necessary. But the use of perfect ciphers
-requires key lengths proportional to messages [3]. This inconvenience can be solved with the use
-of key distribution over communication channels protected from eavesdropping. There are several
-approaches in order to remove (or at least to control) an eavesdropping on the keys:
-quantum channels [4],
-methods based on uctuation of radio wave channels [5, 6, 7, 8],
-Wyner's concept of wire-tap channel,
-key generation by hashing of random string initially distributed over noisy channels [9, 10,
-11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22].
-In the current paper, we follow the last approach. The most advanced results in this setting,
-under the condition of an active adversary have been obtained by Maurer and Wolf. They proposed
-several key distribution protocols [11, 12, 13, 14, 15, 16, 17, 18, 19] and made a performance
-comparison of asymptotic and non-asymptotic key rates for a given level of key security.
-We considered in [22] some modication of the Maurer and Wolf's MW-protocol consisting in
-using an authentication algorithm over noisy channels, called by ourselves the -protocol , instead
-of the request-response algorithm presented in [17]. In the same paper [22], we proposed also the
--protocol that diers from the -protocol in absence of the hash function transmission over public
-discrete channel because the hash function can be formed from the string which the users have got
-just after the execution of the initialization phase. Using the -protocol entails an increasing of
-the key rate in several cases. We proposed also in [22] the so called 0and0-protocols in which
-special initially distributed short keys are used in order to provide authentication procedures over
-public discussion channels (PDC).
-Hybrid protocols comprising pairs of sequentially executed protocols ( ;0), (;0), (;0),
-(;0) were investigated in [22]. The rst protocol in each pair is used to generate an authentication
-2key, whereas the second one provides a generation of the main secret key for encryption/decryption
-given the authentication key. The relation among the key rates and a comparison of protocol
-performance evaluation were also introduced.
-The main feature of the protocols considered in [22] is their strict constructiveness because the
-parameters determining their eciency do not contain unknown coecients typical for O;
-;-
-estimations.
-Our contribution and novel content in the current paper are the following:
-1. We propose some new (modied) key distribution protocols using extractors. We prove ex-
-plicit estimates of key rates without the use of estimates of uncertain coecients in O;
-;-
-estimations. (In [22] we solved the similar problem using hash functions instead of extractors).
-In contrast to [17], we consider a scenario where the legal users are able to receive raw bit
-strings over noisy channels and as a consequence they are pairwise distinct. This entails the
-need to send check symbols from user A to user B in order to agree the raw bit strings received
-by legal users. By the same reason, we have changed the authentication algorithm: instead of
-a request-response algorithm [17], we use a non-interactive one based on the authentication
-code.
-A consideration of the non-asymptotic case leads us in the new conclusion that the use of
-extractors is superior to the use of hash functions only for very large key lengths ( `) of the
-order of 105bits.
-2. We suggest hybrid key distribution protocols consisting of two consecutively executed stages.
-At the rst stage, a short authentication key based on a hash function is generated, whereas
-at the second stage, the nal key using extractors is generated. We show that in fact the use
-of an extraction procedure is eective only at the second stage. We get also explicit estimates
-of key rates for such protocols.
-3. We prove also an asymptotic behavior of the key rates for all considered protocols that allows
-to compare the potential eciency of them with the potential eciency of protocols considered
-here and in [22].
-3The outline of this paper is the following: Section 2 contains the preliminaries and descriptions
-of the main procedures to be used in key distribution protocols. In Section 2.1 we describe the
-model of key distribution based on noisy wire-tap channels in the presence of an active adversary
-and we introduce the main criteria for key distribution protocol eciency. We introduce main
-procedures as error correction, authentication and privacy amplication (based both on hashing
-and extraction). In section 3 we describe the ext-protocol, and the new key distribution ext-
-protocol without transmission of the extractor's seed on the public discussion channel and we prove
-their main features. In section 4 we present a modication of the previous 0
-extand0
-ext-protocols
-under the condition that initially the legal users share short authentication keys. In section 5 we
-describe the so called hybrid protocols as combinations of dierent pairs of single protocols and we
-estimate their performance evaluation. In section 6 we conclude the paper.
-2 Main notions and procedures involved in the key distribution
-protocol
-Here, we repeat mostly the content of the same point as in [22]. It is done in order to provide an
-independent reading of the current paper.
-2.1 Model for key distribution and the main criteria for protocol eciency
-Let us consider the model of key distribution between a legal user, Alice (A), and another user, Bob
-(B), in the presence of an active adversary, Eve(E), assuming that initially the legal users do not
-have shared secret keys. The key distribution protocol (KDP) consists of two phases: initialization
-and key generation .
-In the KDP initialization phase, A, B, and E receive random i.i.d. sequences X=fxigk
-i=1,
-Y=fyigk
-i=1,Z=fzigk
-i=12f0;1gk, respectively, such that for each i, Pr (xi6=yi) =pmand
-minfPr (xi6=zi);Pr (yi6=zi)g=pw(see Figure 1). One of the methods to provide legal users A,
-B with the sequences X,Yis to generate the truly random sequence S=fsigk
-i=12f0;1gkby
-some trusted party, say source S, and then to transmit it to the legal users A and B over noisy
-channels (as in the source model [9], [12]). We will assume that A and B receive the sequences X,Y
-4Figure 1: Model of key distribution protocol over noisy legal channels in presence of an active
-adversary.
-over binary symmetric channels (BSC) without memory with error probabilities A= Pr (xi6=si),
-B= Pr (yi6=si), while the adversary E receives the sequence Zover a BSC with error probability
-E= Pr (zi6=si). It is easy to see that if the original sequence Sis truly random then the
-same property holds for the sequences X,YandZ. (Examples of practical implementation of the
-initialization phase in real world can be found in [22]). In this phase it is natural to assume that
-the adversary is unable to intervene the transmission from S to A and B.
-The key generation phase consists in an information exchange over a public discussion channel
-(PDC) with a goal to share eventually the nal key. We note that the use of PDC is necessary
-in order to send check symbols to test the agreement of the strings X and Y and sometimes for
-the parameters of the hash function or extractor seed transmission (see details in the following
-sections). The adversary E can receive all information transmitted over the PDC. We assume also
-that the PDC's between legal users and E are binary noiseless channels (if E does not intervene
-in transmission). However E can change or replace this information as desired and therefore it is
-necessary to authenticate messages transmitted over a PDC in order to detect any intervention of
-E and to reject suspicious messages.
-Let us dene the following parameters of the key distribution protocol characterization:
-`: the key length (the number of bits which are contained in the keys KAandKB),
-I(KA;U): the amount of Shannon's information in possession of the adversary E about the
-nal keyKAafter receiving all acceptable information U, including the sequence Zand the
-5other messages transmitted over the PDC
-Pe= Pr (KA6=KB): the probability of legal users keys disagreement,
-Pf: the probability of false rejection of the KDP protocol (when A or B falsely believe that E has
-intervened the PDC),
-Pd: the probability of deception false information provided by E during information transmission
-over PDC (it can result in an opportunity to x a key between any legal user and E although
-leaving the legal user on the belief that he (she) has shared a key with his (her) legal partner),
-Rk: the key distribution rate (the ratio of the key length `to the length of sequences X,Y),
-Rk=`
-k:
-It is reasonable to impose the following conditions on the KDP:
-`=`req; (1)
-I(KA;U)Iadm; (2)
-PePadm
-e; (3)
-PfPadm
-f; (4)
-PdPadm
-d; (5)
-where`reqdenotes the required key length and the superscript adm stands for admissible parameter
-value . We will say that the above conditions are requirements of the KDP . The eciency of the
-KDP will be estimated by the key rate Rkand then among all protocols satisfying (1)-(5), we will
-select the most ecient by making Rkto attain its largest value. As we will show later, some
-inequalities (2)-(5) may randomly hold. Then an additional requirement can be stated as
-PriskPadm
-risk; (6)
-wherePadm
-riskis the probability that at least one of the inequalities (2)-(5) does not hold.
-62.2 Known asymptotic results regarding key rates
-Let us denote by R,Rthe maximum achievable key rates in a KDP between the legal users
-under the condition of a passive or active adversary, respectively. In the papers [12], [14], [17], [19]
-the proofs of these values were presented. For the source model of the wire-tap channel with
-initialization phase in the KDP using BSC with probabilities A,B,Ethe following theorem
-holds:
-Theorem 1 (see [19]) IfE>AandE>B, thenR=R. If eitherEAorEB
-thenR= 0.
-We note that under the conditions E>AandE>B, the users A and B either share the key
-or they may detect interception in the case of E's intervention. This fact cannot be interpreted as
-a defect of KDP because E can use even a simple strategy: she tries to break o the PDC between
-legal users in order to impede the completion of the KDP. Let pm,pA
-w,pB
-w, denote the probabilities
-of disagreements among the sequence pairs ( X;Y ), (X;Z), (Y;Z) respectively. Then
-pm=A+B 2AB
-pA
-w=A+E 2AE
-pB
-w=B+E 2BE
-It is easy to see that if E> AthenpA
-w> pmand similarly if E> BthenpB
-w> pm. We will
-consider the worst case for legal users as pw= minfpA
-w;pB
-wg.
-After the execution of the initialization phase the source model is reduced to the channel model
-where user A sends the sequence Xkto user B who receives it as Yk, whereas E receives XkasZk.
-Then the probability of error on the main virtual BSC between A and B is pmand the probability
-of the wire-tap virtual channel from A to E is pw. (The PDC remains the same after such reduction
-of the source model to the channel model.)
-Theorem 2 (see [19]) In the channel model setup with probabilities pm,pwthe maximum key
-distribution rate is
-R=g(pw) g(pm); (7)
-7wherep7!g(p) = plogp (1 p) log(1 p)is the entropy function .
-2.3 Error correcting codes
-LetCbe a binary linear error-correcting ( k+r;r)-code and let Crbe a string consisting of rcheck
-symbols. It has been proved in [23] that if the information symbols are transmitted on the BSC
-with the error probability pm, whereas the check symbols on the noiseless channel, then the average
-error probability of decoding on the ensemble of all ( k+r;r)-codes meets the following modied
-Gallager's bound
-Pe2 kE(Rc); (8)
-where
-E(Rc) = max
-2(0;1)
-E0() (2Rc 1)
-Rc
-; (9)
-E0() = (1 +) log2
-p1
-1+m(1 pm)1
-1+
-(10)
-is Gallager's function for a BSC with the error probability pm
-Rc=k
-k+r(11)
-is the code rate. We note that in the frame of the above model, the code rate Rcsatises the
-inequality
-02Rc 1
-RcC; (12)
-whereC= 1 g(pm) is the capacity of the BSC with the probability of error pm.
-It follows from (12) that1
-2Rc1
-1+g(pm). In the asymptotic case Rc!1
-1+g(pm), then
-r=kg(pm): (13)
-We see from (13) that an arbitrary small value of the erroneous decoding probability is achieved
-for large block length if the number rof check symbols (but not block length) is proportional to
-the number of information symbols kwith coecient g(pm).
-82.4 Authentication based on the class of universal hash functions
-In order to execute the authentication procedure, we use the universal hash function which are
-described below.
-For any nite set A, letjAjdenote its cardinality. For any two nite sets A;B, letHbe a set of
-hash-maps A!B. For eachx0;x12A, letH(x0;x1) =jfh2Hjh(x0) =h(x1)gjbe the number
-of hash functions in Hthat collide in x0andx1. We recall that Hisuniversal 2,U2in short, if for
-eachx0;x12A,H(x0;x1)jHj
-jBj.
-LetPcolbe the so called collision probability , namely the probability that there occurs a pair of
-elements in Acolliding under an uniformly chosen map h2H. Clearly,PcoljBj 1. The class H
-isstrongly universal 2,SU2, if
-8x2A;8b2B:jfh2Hjh(x) =ygj=jHj
-jBj(14)
-and besides for any distinct x0;x12A, and anyy0;y12B,
-jfh2Hjh(x0) =y0&h(x1) =y1gjjHj
-jBj:
-For a given >0, the class His-almost universal ,-AU2, if for allx0;x12A:H(x0;x1)jHj.
-The classHis-almost strongly universal ,-ASU 2, if (14) holds and for any pairs x0;x1andy0;y1
-of distinct points in AandB,
-jfh2Hjh(x0) =y0&h(x1) =y1gjjHj
-jBj2:
-Naturally, each class jBj 1-ASU 2is alsoSU2.
-Examples of hash functions classes : We assume that the sets AandBconsist of all binary
-sequences of lengths aandb, respectively: A=f0;1ga,B=f0;1gb, hencejAj= 2a,jBj= 2b.
-AnU2class. The setAcan be identied with the Galois eld GF(2a). For each s2GF(2a),
-leths:A!B,x7!bxscb, where the map z7!bzcbtakes thebleast signicant bits in z. The
-classfhsgs2AisU2. Such hash functions are described uniquely by binary strings of length
-a.
-9AnSU2class. For eachs;t2GF(2a), lethst:A!A,x7!sx+t. The classfhstgs;t2A
-isSU2and clearly this class can be indexed by sequences of length 2 a.
-An-ASU 2class. It has been shown in [24] that the hash functions chosen from an -
-ASU 2class are connected with incomplete balanced schemes . The parameters of the -ASU 2
-class can be described as
-jAj=q2i;jBj=q ;jHj=qi+2; =i+ 1
-q; (15)
-whereqis a power of a prime and i>1 is an integer.
-Let us analyze the procedure of message authentication. Let xbe the message to be authenticated
-during its transmission from user A to user B. User A forms the authenticator y=h(x) of his
-messagexusing the keyed hash function h2Hknown by him (but unknown for adversary the
-E), then A appends ytoxand sends the pair ( x;y) to the legal user B. In order to check the
-authenticity of the message x, the user B receives a pair (~ x;~y) (which may be forged), B forms the
-authenticator ~~y=h(~x) with his knowledge of the secret hash function hand compares ~~ywith ~y. If
-they coincide then B accepts x, otherwise he rejects it.
-It was shown in [24] that if the hash functions, chosen from the -ASU 2class, are used in the
-authentication procedure then for the best adversary's strategy consisting in an impersonation or
-substitution of the messages, the following probability bounds hold
-Pi jBj 1; (16)
-Ps; (17)
-wherePiis the probability of message impersonation, and Psis the probability of message substi-
-tution.
-Let us dene the probability of undetected false message deception by the adversary as P=
-maxfPi;Psg. The bounds (16), (17) will hold only if the active adversary ignores completely the
-used hash function hin the authentication procedure. But there may be situations when the keyed
-hash function is partly known by the adversary although authentication procedure is still possible.
-10In order to clarify this situation let us recall initially from [14] that for a discrete random variable
-taking values over a set Xwith probability distribution Pthe minimal entropy is
-H1() = log max
-x2XP(x);
-and the Renyi entropy of the random variable is
-H2() = logX
-x2XP2
-(x): (18)
-Theorem 3 (see [25]) Suppose legal users A and B have the random key hwith length `0within
-an authentication scheme based on -ASU 2hash functions where = 2 ~b. Denote by Uthe total
-knowledge of E about h. Then, assuming that for any sample u
-H1(hjU=u)t`0;0<t< 1; (19)
-the probability Pdofmessage undetected deception is upper bounded as
-Pd2 ~b `0(1 t)
-2 1
-:
-2.5 Authentication based on noisy channels
-The message authentication considered above and based on the use of hash functions from either the
-classSU2or the class -ASU 2requires a possession by legal users of the secret or partly secret keys.
-However such keys cannot be taken directly from the strings Xk,Ykshared in the initialization
-phase because they dier even for legal users. On the other hand it is impossible to conciliate
-these string by sending from A to B the check symbols strings of Xkbecause PDC is get not
-authenticated and B could \conciliate" formerly the false string Zkwith E.
-In order to avoid this situation it is necessary rstly to design a keyless message authentication
-based on noisy channels. In [12] a special type of codes has been proposed in order to solve this
-problem: the so called authentication codes (AC). Let us describe them briey.
-In an initialization phase the users share the strings Xk,Ykover a BSC (Pr ( xi6=yi) =pm) and
-11they agree an error correcting binary systematic ( na;ka)-codeVin order to authenticate a length
-kamessage. The authenticator w= (w1;:::;wna) of a message mis formed as follows: for each
-iletvibe thei-th bit of the codeword in Vcorresponding to mandwi=viifvi= 1, or let it
-remain undened otherwise.
-After receiving a pair ( ~m;~w), the user B forms his authenticator ~~wfor the message ~musing
-his stringYkaccording to the agreed procedure and compares ~wwith ~~w. If the number of the
-coinciding bits in them is less or equal to some given threshold  wthen the message ~msucceeds
-as authentic, otherwise it is removed as forged. The AC's were investigated in [12] and can be
-characterized by two probabilities:
-Pf.the probability of false removal of the message although adversary E does not intervene at all;
-Pd.the probability of the deception of false message, i.e. the probability of the event that E has
-forged a message and this fact was not detected by B.
-PfandPddo not depend on ordinary minimum code distance of the code Vbut on the so called
-minimum asymmetric semidistance d01that is determined by the minimal number of dierences
-between 0 and 1 symbols in any pair of distinct code words of V.
-Theorem 4 (see [22, 26]) LetVbe an (na;ka)-AC with constant Hamming weight for all non-
-zero codewords and with asymmetric semidistance d01. Then the probabilities PfandPdfor the au-
-thentication procedure on noisy wire-tap channel with parameters pmandpw, can be upper bounded
-as follows:
-PfX
-i=w+1
-i
-pi
-m(1 pm) i;
-PdwX
-i=0d01
-i
-pi
-m(1 pm)d01 i
-w 1X
-j=0 d01
-j
-pj
-m(1 pm) d01 j:
-It is a very hard problem to nd d01for any linear code. But there exists a very simple method to
-design the code Vwith known d01, given the linear ( n0;k0)-code ~Vwith known ordinary minimum
-code distance dproposed in [12].
-12Namely, let us substitute the symbol 1with the symbol pair 10and the symbol 0with 01in
-~V.Then evidently the parameters of the code Vare:
-na= 2n0; ka=k0; d 01=d ;  =n0: (20)
-We have proved in [22] the following theorem with the use of the above code.
-Theorem 5 LetVbe a (k0+r0;k0)-error correction code with minimum distance dthat is used
-in the authentication procedure. Then for any p;q > 0there exists an integer k0
-0and an AC,
-guaranteeingr0
-k0<q,Pfp,Pdpfor allk0>k0
-0.
-It follows from this theorem that
-r0
-k0+r0!0 ask0!+1:
-This means that the length of the authenticator approaches zero as the block length tends to
-innity. Other methods to design constant weight AC were investigated in [27].
-2.6 Extractors
-Let us recall the notion of extractor andstrong extractor [28, 29, 30]. Two probability distributions
-P;Q, dened on the same set X, are called -close if their statistical dierence
-dif(P;Q) =1
-2X
-x2XjPX(x) QX(x)j
-does not exceed . A mapE:f0;1gkf0;1gu!f0;1g`is an (;)-extractor if for any probability
-distribution random variable Xonf0;1gksuch thatH1(X)and any uniformly distributed
-random variable   on f0;1gu, the statistical dierence probability distribution of the extractor
-outputE(X; ) with respect to an uniform distribution on f0;1g`is at most. In order words, the
-extractor maps a random sequence Xof lengthkwith symbols taken from an ensemble of minimal
-entropyH1(X) to a random sequence of length `that is-close to an uniformly distributed sequence
-with the help of a truly random sequence   of length u. The last sequence can be seen as a \seed"
-of the extractor. The extractor E(X; ) has parameters ( k;;u;`; ), wherekis the length of
-13input random sequence, is the evaluation of minimal entropy ( H1(X)) on the set of input
-sequences,uis the length of the seed  , `is the length of the output sequence, and is the statistical
-distance between the output probability distribution and an uniform distribution on the output
-set.
-A mapping E:f0;1gkf0;1gu!f0;1g`is called a strong extractor E(X; ) if for any proba-
-bility distribution random variable Xon the setf0;1gkhaving minimal entropy H1(X)and
-for any uniformly distributed random variable   on the set f0;1guthe probability distribution of
-the concatenated variables (  E(X; )) is close to an uniform distribution on f0;1g`+u. More
-specically
-dif
- E(X; );Uu+`
-:
-This means that the strong extractor provides the closeness of probability distribution for the
-concatenation of the output extractor sequence and the seed sequence to an uniform distribution.
-In the current paper, we will consider only extractors based on the construction [28, 29] which is
-an improvement of the originally proposed by Trevisan [30].
-Theorem 6 (see theorem 22 in [29]) For everyk,H1(X),`2Nand >0, such that `
-H1(X)k, there are explicit strong (H1(X);)-extractors E:f0;1gkf0;1gu!f0;1g` with
-u=O0
-@log2
-2 k
-
-log2
-H1(Xk)
-`1
-A; (21)
-or
-u=O
-log2
-2k
-
-log21
-
-; (22)
-where 1 +=k
-` 1, <1
-2and =O(d). The value is the loss of extractor output sequence
-length .
-The rst extractor (21), withH1(Xk)
-`constant, is used for extraction of an arbitrary part of
-randomness ( H1(Xk)) from the input sequence Xk, whereas the second one (22) is needed in order
-to extract all randomness `=H1(Xk) from the input sequence Xk.
-We are not going to use the estimates based on the O-operator and therefore let us nd a more
-accurate estimate for the length of the seed. For this reason we consider in greater detail the design
-14Figure 2: Design of the Trevisan's extractor.
-of the Trevisan's extractor modied by Raz, Reingold, Vadhan [29].
-In order to design the Trevisan's extractor it is necessary to realize three components:
-1. The linear error code W: With parameters (~ n;k) and minimal code distance dw, where
-~n= 2,2N. It is proposed to take this code as a concatenation of the Reed-Solomon and
-the Adamar codes.
-2. Combinatorial block design scheme. ( Balance incomplete block design , BIBD). This is a family
-of setsS=fS1;S2;:::;S`gholding the following properties:
-Sif1;2;:::;ug;
-jSij=;
-i6=j=) jSi\Sjj<logcwithc1: (23)
-This means that the family consists of `sets or blocks, each consisting of elements taken
-from the set of integers f1;2;:::;ug, while the number of elements contained simultaneously
-in any pair of blocks is at most log c. Such construction is designated as a ( ;c)-scheme .
-3. Boolean function f: This map is dened over f0;1gand for each a1;:::;a2 f0;1g,
-f(a1;:::;a) is a codeword of the (~ n;k)-codeW.
-The design of the extractor based on the three components given above is presented in Figure 2.
-The algorithm is executed in the following stages:
-151. The input sequence xis encoded as wwith the error correcting (~ n;k)-codeW. The word w
-gives the value of the Boolean function f:f0;1g!f0;1g`.
-2. The random sequence of lengthudetermines the samples jSi, consisting of symbols of
-with the use of blocks Sibelonging to the ( ;c)-BIBD. This means jSi= []s2Si.
-3. Output w=f
-(jSi)`
-i=1
-as the result of the extractor.
-In the modied extractor version at [29], it was proposed to use a ( ;c)-weak scheme , in which the
-condition (23) is changed by the condition
-X
-j<i2jSj\Sijc(` 1);
-wherecis some constant, c>1. The length ~ nof the code Wis chosen in [29], p. 106, according
-to the condition
-log(~n) =O(logk
-):
-Sincewis the output of a Boolean function with arguments, ~ nshould be equal to 2. Obviously
-this condition will be fullled if
-=
-logk
-
-; (24)
-wheredxeis the \ceiling" of x(the least integer greater or equal than x).
-The characterization of strong extractor is determined by the following statements.
-Theorem 7 (Proposition 10 in [29]) IfS= (S1;:::;S`)(withSi) is a weak (;c)-design
-for
-c=1
-`
-H1(Xk) 3 log`
- u 3
-; (25)
-thenE:f0;1gkf0;1gu!f0;1g`is a strong (H1(Xk);")-extractor.
-Theorem 8 (Lemma 15 in [29]) For every;`2Nandc>` , there exists a weak (;c)-design
-S= (S1;:::;S`)(withSi) and
-u=l
-lncm
-: (26)
-Moreover, such a family can be found in polynomial time poly (`;u).
-16Theorem 9 (Lemma 17 in [29]) For every;`2Nand0<<1
-2, there exists a weak (;1+)-
-designS= (S1;:::;S`)(withSi) withu=O
-2log1
-
-:Moreover, these families can be
-found in polynomial time poly (`;u).
-The results of Theorem 6 will be avoided in our further investigation because a presentation of
-the output sequence length uin the form `  is inconvenient in the optimization procedure.
-We will get an estimate of utaken from the results of Theorems 7-9 directly. More specically,
-using (24) and (26) one can write the relation for the necessary number of seed symbols for the
-rst extractor (21) in Theorem 6:
-u=&
-logk
-
-lnc'
-
-logk
-
-: (27)
-For the second extractor (22), it follows from the proof of lemma 17 in [29] that u0=
-ln 2
-,
-whereu=u0,=l
-log4
-m
-, 0<<1
-2. Then in terms of (26) we get
-u=&
-logk
-
-ln 2'
-
-logk
-
-
-log4
-
-:
-2.7 Privacy amplication
-The procedure of privacy amplication (PA) at the nal stage of the key generation between users A
-and B has been investigated in detail in [10, 17]. PA can be implemented either by hashing [10, 17]
-or by extraction [28]. We will consider in the current paper the second approach.
-In order to compare our new results with the results obtained in [22] where hashing has been
-used as the privacy amplication procedure, let us specify an application of both methods.
-The sequence Xkof lengthkbits is mapped by the user A to the sequence X`
-Aof length`
-through a keyless hash function from the class U2, orSU2. In a similar manner the user B forms
-his keyX`
-Bafter error-correcting his sequence Yk.
-The most important parameter of the PA procedure is the residual Shannon's information
-received by the adversary E, concerning the nal key KA=KB. The estimates of this information
-leaking of E are given in [10, 17] for dierent settings of wire-tap channels. The more general bound
-is presented below.
-17Theorem 10 (see [10]) LetXkbe the sequence of length ktransmitted from A to B over a BSC
-with the error probability pmand received by B as the sequence Yk. Assume also that Zkis the result
-of receiving Xkby the adversary E over a BSC with probability pw, while the Renyi information
-contained in ZkaboutXkist. LetHbe aU2-class of hash functions from f0;1gkintof0;1g`,
-known by all participants (A, B and E) and let h2Hbe a truly random hash function chosen
-by A, transmitted to B over a PDC. If the users A and B compute their keys as KA=h(Xk),
-KB=h(~Yk), then the amount of Shannon's information about the keys KA;KBis upper bounded
-as
-I(KA;Zk;h)2 (k ` t)
-ln 2: (28)
-The Renyi information tis connected with the Renyi entropy H2(XkjZk) as
-t=k H2(XkjZk): (29)
-For the BSC used as wire-tap channel we have by (18)
-H2(XkjZk) = klog 
-p2
-w+ (1 pw)2
-:
-If the adversary receives some extra information about Xkaside the information contained in Zk
-(for instance the sequence Crof check symbols of length reavesdropped by E over the PDC), then
-the amount of conditional Renyi entropy H2(XkjZk;h;Cr) that received E can be estimated by the
-theorem 11 appearing below. (This theorem also gives the estimation of the amount of conditional
-minimal entropy H1(XkjZk;h;Cr) which we use later).
-Theorem 11 (see [17]) LetXandCbe two random variables and let s>0. Then the following
-inequalities hold:
-H2(X) H2(XjC=c)logjCj+s (30)
-with a probability at least 1 2 s
-2 1,
-H1(Xk) H1(XkjC=c)logjCj+s (31)
-with a probability at least 1 2 s.
-18We can apply (30) in order to estimate H2(XkjZk;h;Cr). Then we get
-H2(XkjZk;h;Cr)H2(XkjZk;h) r s: (32)
-It follows from (29) and (32) that
-~t=k H2(XkjZk;h;Cr)
-k H2(XkjZk;h) +r+s
-=t+r+s: (33)
-Substituting ~tfrom (33) into (28) instead of t, we get the upper bound of Shannon's information
-leaking to E
-I(KA;Zk;h;Cr)2 (k ` t r s)
-ln 2;
-that holds with a probability Prisk1 2s
-2 1:In order to compare the performance of privacy
-amplication based on hashing and on extraction, let us prove a new lemma establishing a con-
-nection between the Shannon's information leaking to adversary regarding the key at the output
-of the extractor, and the statistical dierence among distribution of the nal key and an uniform
-distribution.
-Lemma 1 If the statistical distance between the output of the extractor generating the length `key
-and an uniform distribution is at most , then the amount of the Shannon's information concerning
-the key got by any adversary is upperly bounded as
-I(K`;Zkj u)2`p:
-Proof. The following inequality holds by denition of strong extractor
-dif( uExt(Zk; u);V`+u): (34)
-The meaning of this inequality is that the probability distribution of the concatenation of the
-extractor's output and the \seed"  uis close enough to an uniform distribution. In order to
-19simplify the notation, let us denote by Dthe term at the left of (34). We note initially that for an
-uniform distribution on the space V`+u, the following equality holds
-D=M u[dif(Ext(Zk;u);V`)]: (35)
-whereuis a random sequence and M u[] is the expectation with respect to the distribution on
- u. In fact,Ditself can also be expressed as the term:
-1
-2X
-u;e`2EPEj u(e`)P u(u) PV`(v`)PVu(vu); (36)
-wheree`is the output sequence of the extractor E.
-Since the distributions P u(u) andPVu(vu) are both uniform, the term (36) gives:
-D=1
-2X
-uP u(u)X
-e`2EPEj u(e`) PV`(v`)
-=1
-2X
-uP u(u)dif(Ext(Zk; u);V`)
-=M u[dif(Ext(Zk;u);V`)]
-proving (35). By combining (34) and (35) it is obtained
-M u[dif(Ext(Zk;u);V`)]: (37)
-Using the well known Markov's inequality, (37) implies
-P uh
-dif(Ext(Zk;u);V`)i
-1 1
-;
-where1 is some arbitrary value.
-In the lemma 6 at [17], the following inequality has been proved which put in our own notation
-states
-H
-Ext(Zk;u)
-`
-1 dif(Ext(Zk;u);V`) 2 `
-: (38)
-20Taking into account that the output extractor sequence is just the key, we can write
-H
-Ext(Zk;u)
-=H
-K`j u=u
-: (39)
-Then by substituting (39) into (38), we have that the inequality
-H
-K`j u=u
-`
-1 dif(Ext(Zk;u);V`) 2 `
-(40)
-will hold with probability
-P u[inequality (40) holds] 1 1
-: (41)
-It follows from (41) a trivial estimate for the averaged value H 
-K`j u=u
-overu, namely
-H
-K`j u
-
-1 1
-
-`
-1  2 `
-: (42)
-After a simplication on the right side of (42) and by neglecting smaller values than 2 `
-H
-K`j u
-`
-1  1
-+
-:
-Then for the amount of information leaking of an adversary concerning the key K`, given the
-knowledge of  u, the following bound is obtained
-I(K`;Zkj u)`
-+`( 1): (43)
-The right side of (43) is minimized under the condition =1pgiving the nal inequality
-I(K`;Zkj u)2`p
-providing thus the desired result. 
-It follows from the above lemma that if the value of the statistical dierence at the extractor
-output that forms the length `key does not exceed , then the amount of the residual information
-regarding the key obtained by the adversary does not exceed 2 `p.
-21This means that a requirement, regarding the amount of Shannon's information on the key
-leaking to an adversary, of the form I(K`;Zkj u)Iadmwill be fullled if 2 `p=Iadm. This fact
-results in the following requirement to the extractor's statistical distance:
-=Iadm
-2`2
-: (44)
-3 Key distribution protocols
-3.1 Statement of the protocols
-Two key distribution protocols in presence of an active adversary have been proposed by Maurer
-and Wolf in [17]: the UH-protocol , in which privacy amplication procedure was executed using
-hash functions and the EX- protocol based on extractions. It has been shown in [17] that the EX-
-protocol majors the UH-protocol with respect to several conditions.
-We want to investigate a performance of these and other new protocols. We will show that our
-new protocols are superior than those considered in [17] for non-asymptotic cases (e.g. when the
-sequence lengths are nite).
-Initially we consider modied UH- and EX-protocols and denote them as andext, respectively.
-A dierence between the original and the modied protocols is determined by two factors.
-1. We consider protocols under the condition A6= 0,B6= 0,A;B<E, or equivalently the
-conditionspm>0,pw> pm, see Figure 1. This requires to send the check symbols from A
-to B in order to conciliate XkandYk.
-2. Instead of the authentication algorithm \ request-response " presented in [17], we will use non-
-interactive the AC-based algorithm (see Section 2) because this allows the users to provide
-authentication even when the sequences XkandYkdo not coincide completely. By the same
-reason, the authentication algorithm and the number of substrings of the original strings Xk
-andYkare changed.
-Before the execution of the ,ext-protocols, the users A and B divide their respective sequences
-Xk,Yk, intoXk1
-1,Xk2
-2andYk1
-1,Yk2
-2of lengthsk1;k2. (The rst parts Xk1
-1andYk1
-1will be used
-22for key generation in the execution of the PA procedure while the second parts Xk2
-2andYk2
-2will be
-used in the execution of the authentication procedure). Since the -protocol was already considered
-in [22], we move on to the ext-protocol [31].
-1. The user A forms the string Cr1
-1of check symbols of length r1to the string Xk1
-1using a
-(k1+r1;k1)-error correcting code C1. (This code should be agreed by users in advance.)
-2. The user A generates a truly random binary sequence (which will be used as an extractor
-seed) of length u.
-3. The user A forms the authenticator wfor the message ( Cr1
-1;) using for that an AC based
-on an error correcting ( n0;k0=r1+u;d)-code and the sequence Xk2
-2.
-4. The user A sends to B the message ( Cr1
-1;) over a PDC appended with the authenticator w.
-5. The user B veries the authenticity of the message ( Cr1
-1;) through the known ( n0;k0)-AC
-and his string Yk2
-2(see section 2.5). If authenticity is conrmed, then B goes to the next
-step. Otherwise he rejects the KDP.
-6. The user B corrects the error in string Yk1
-1through the check symbols string Cr1
-1. We denote
-by~Yk1
-1the stringYk1
-1after error correction.
-7. In order to get the keys KAandKBboth users A and B execute a privacy amplication
-procedure based on an extractor (see section 2.6): KA=Eext(X1;),KB=Eext(~Y1;).
-Recall that the -protocol diers from the ext-protocol in that it generates a hash function h
-in step 2. This hash function jointly with the check symbols of Cr1
-1and the authenticator ware
-transmitted to B (steps 3-5). In the seventh step, this hash function is needed for key generation:
-KA=h(X1),KB=h(~Y1).
-It has also been proposed in [22] a new -protocol that diers from the -protocol in the
-following: After the execution of the initialization phase, both users A and B have got the strings
-that can in fact be used to form the hash functions. In this way, we do not require to send the hash
-functions over the PDC, hence the length k2used before for authentication of the hash function
-can be shortened. Therefore we may expect that the length of the substring X1is increased (if the
-23total length of the string Xis xed). But such conclusion is not so apparent because we have to
-extract the hash function as a segment from the string X.
-A similar problem appears in the case in which an extractor is used instead of a hash function
-for privacy amplication. In the ext-protocol A generates a truly random sequence and sends
-it to B jointly with the authenticator of . But the required sequence can be gotten directly by
-both users A and B from the initially distributed strings XandY. This results in the following
-ext-protocol. It is worth to note that although is not uniformly distributed from the adversary's
-point of view this has no relevance for strong extractors.
-Within the above setup, the users A and B divide the strings Xk,Ykinto three disjoint parts
-Xk1
-1,Xk2
-2,Xk3
-3andYk1
-1,Yk2
-2,Yk3
-3withk1+k2+k3=k. Then they execute the following steps:
-1. The user A forms the length r1stringCr1
-1of check symbols of the string Xk1
-1using the error
-correcting ( k1+r1;k1)-codeC1, agreed in advance.
-2. The user A forms the length r2check string Cr2
-2of the string Xk3
-3using the error correcting
-(k3+r2;k3)-codeC2, agreed in advance.
-3. The user A forms the authenticator wof the message ( Cr1
-1;Cr2
-2) using an AC and his substring
-Xk2
-2.
-4. The user A sends to B the message ( Cr1
-1;Cr2
-2) over a PDC appended with w.
-5. The user B veries the authenticity of the message ( Cr1
-1;Cr2
-2) using a AC and his substring
-Yk2
-2. If it is conrmed then he goes to the next step. Otherwise he rejects the KDP.
-6. The user B corrects errors on strings Yk1
-1,Yk3
-3, using the check strings Cr1
-1andCr2
-2. Denote
-by~Yk1
-1,~Yk3
-3, the strings Yk1
-1,Yk3
-3, after error corrections.
-7. The users A and B take their substrings Xk3
-3,~Yk3
-3, wherek3=u, as the second argument u
-in their extractors.
-8. Both users A and B form the keys as KA=Eext(X1;X3),KB=Eext(~Y1;~Y3).
-243.2 Performance evaluation of the protocols
-A theorem has been proved in [22] determining the optimal parameters for both the , and-
-protocols depending on the posed requirements. Let us prove a generalization of that theorem for
-the,,ext, andext-protocols. We will assume that for the , and-protocols a hashing is
-used as privacy amplication procedure, whereas for ext, andext-protocols an extraction is used.
-Moreover we assume that the rst extraction scheme considered in section 2.6 is used, where the
-number of random bits u is determined by equation (27).
-Theorem 12 Let us assume that the users A, B and the adversary E have binary strings Xk,Yk
-andZk, respectively after execution of the initialization phase over the wire-tape channel, pw=
-Pr (xi6=yi),pw= minfPr (xi6=zi);Pr (yi6=zi)g,pm0,pw> pm. Then A and B are able to
-form a common key of length `satisfying the requirements (2)-(6) after the execution of any of
-the,,ext, andext-protocols if the parts of lengths k1;k2on which were divided the substrings
-Xk,Ykfor the, andext-protocols or the parts of lengths k1;k2;k3on which were divided the
-substringsXk,Ykfor the, andext-protocols satisfy the equations listed below:
-for all protocols
-k1= logPadm
-e
-E(Rc1); (45)
-forand-protocols
-k1=`+r1 2 logPadm
-risk log(Iadmln 2) 2
- log(p2w+ (1 pw)2); (46)
-forext, andext-protocols
-k1H1=`c+r1 logPadm
-risk+u
-+3 log`Iadm
-2` 2
-+ 3; (47)
-25whereRc1andE(Rc1)are determined by (8)-(11) and
-u=2
-66666
-logk1
-Iadm
-2` 2
-lnc3
-77777&
-logk1Iadm
-2` 2'
-(48)
-is the number of the extractor random symbols, cis a parameter under optimization, H1=
- log max(pw;1 pw),
-k2
-1 g2d
-k2
-= 2k0; (49)
-k2X
-i=w+1k2
-i
-pi
-m(1 pm)k2 i=Padm
-f; (50)
-wX
-i=0d
-i
-pi
-w(1 pw)d i
-w iX
-j=0k2 d
-j
-pj
-m(1 pm)k2 d j=Padm
-d; (51)
-where
-k0=8
->>>>>>><
->>>>>>>:k1+r1for the-protocol,
-2r1 for the-protocol,
-u+r1for theext-protocol,
-r1+r2for theext-protocol,(52)
-andr2being the number of check symbols of the error correcting (k3+r2;k3)-codeC2found similarly
-as in equation (45),
-k3=8
->>>>>>><
->>>>>>>:0for the-protocol,
-k1for the-protocol,
-0for theext-protocol,
-ufor theext-protocol.(53)
-The key rate is then determined as follows:
-R=`
-k1+k3; R=`
-2k1+k3;
-Rext= max
-c`
-k1+k2; Rext= max
-c`
-u+k1+k2: (54)
-26Proof . For theand-protocols the theorem has been proved in [22]. Let us prove it only for
-theext, andext-protocols.
-Let the bounds of the KDP parameters meet exactly all requirements (2)-(6), e.g. the following
-equation hold:
-Pe=Padm
-e= 2 k1E(Rc1)
-whereRc1=k1
-k1+r1is the code rate, and E(Rc1) is computed by (8)-(10). Under the condition that
-the adversary gets the sequence Zk1over a BSC with error probability pwthe conditional minimal
-entropy is
-H1
-Xk1jZk1
-=k1H1(XjZ)
-= k1log max(pw;1 pw)
-=k1H1:
-Since the adversary receives also the check block Cr1
-1, in line with (31) the following inequality
-results:
-H1
-Xk1jZk1;Cr1
-1
-k1H1 r1 s; (55)
-which does not comply with the probability Prisk2 s.
-By substituting (55) into (25), we may write "2
-3where=`c+3 log` k1H1+r1+s+u+3.
-Let us assume that Iadmis chosen in such a way that
-2
-3= logIadm
-2`2
-;
-resulting thus condition (44). Hence we can write
-`c+ 3 log` k1H1+r1+s+u+ 3 = 3 logIadm
-2`2
-: (56)
-AssumingPrisk=Padm
-risk= 2 s, (56) holds eventually from (47). The value uin (56) is the number
-of the extractor random symbols. In order to nd it, we can use (27) substituting by
-Iadm
-2`2
-in
-line with Lemma 1 that results in (48). A solution of the equation system (45) and (47) allows to
-27nd the parameters k1,r1, given a xed c. It will be shown in the sequel that the key rate can be
-maximized by a proper selection of the parameter c.
-In order to nd k2let us assume that the probabilities PfandPdhave equal values, Pf=Padm
-f,
-Pd=Padm
-d, with
-Padm
-f =2n0X
-i=w+12n0
-i
-pi
-m(1 pm)2n0 i; (57)
-Padm
-d =wX
-i=0d
-i
-pi
-w(1 pw)d i
-w iX
-j=02n0 d
-j
-pj
-m(1 pm)2n0 d j; (58)
-wheren0;k0;dare the parameters of error correcting codes used in the AC.
-Recall that for the AC we had k2= 2n0wheren0is the length of the error correcting ( n0;k0)-
-code with minimum distance d. For theext-protocolk0=r1+u, while for the ext-protocol
-k0=r1+r2, wherer2is the number of check symbols in the ( k3+r2;k3)-codeC2. This gives
-relation (52) for the parameter k0.
-Using the Varshamov-Gilbert inequality [32] connecting n0;k0;dand taking into account that
-k2= 2n0we get
-k2
-1 g2d
-k2
-= 2k0: (59)
-Solving the equation system (57)-(59), equivalent to the equation system (49)-(51), we nd the
-parameters k2;d. The value r2is calculated by (8)-(10), in which it is necessary to let k=ur=r2,
-p=pm,Pe=Padm
-e.
-In line with the above protocols, we have that for the ext-protocol,k3= 0 and for the ext-
-protocol,k3=u. This fact proves (53). Then relation (54) is apparent from the protocols descrip-
-tion.
-Remark 1 If the solution of the system (45)-(53) is not unique then it is reasonable to select any
-of them maximizing the key rate.
-Remark 2 It is worth to note that the values k1;k2;k3;cfound for the same requirements Padm
-e,
-Iadm,Padm
-risk,Padm
-f,Padm
-d, but for dierent protocols, may be dierent.
-28Figure 3: Dependence of key rate versus the parameter extractor cfor theext-protocol.
-Remark 3 (Choice of cin (47)-(48)) In gures 3 and 4 the dependence of the key rate for the
-ext-protocol and the ext-protocol is plotted versus the parameter c, given xed values `for dierent
-error probabilities in the main channels.
-We assume that pw= 0:2,Iadm= 10 30,Padm
-e=Padm
-risk=Padm
-f=Padm
-d= 10 5in the plotting
-of these curves. From these curves it is patent that the key rate depends essentially on the choice
-of the parameter c.
-Let us compare the ,,ext,ext-protocols on the key rates.
-Theorem 13 If the key length `is given and the rate Rcof the error correction code satises
-Rc2
-3, thenRR, andRextRext.
-Proof . The rst inequality is proved as theorem 10 in [22]. Let us prove the second inequality.
-Let us write Rext=`
-k1+k2andRext=`0
-k0
-1+u+k0
-2. For a xed common length, `=`0, we should
-provek0
-1+u+k0
-2k1+k2.
-29Figure 4: Dependence of key rate versus the parameter extractor cfor theext-protocol.
-Under the requirements (1), (2), (6) posed to the KDP parameters, Prisk,Iadm, it follows
-from (47) that `0=`wheneverk1=k0
-1andr1=r0
-1. Therefore it is necessary just to prove
-k2u+k0
-2: (60)
-According to the scheme of the AC code design we can write k2= 2n0= 2(r1+u+r0), wherer0
-is the number of check symbols of the ( n0;k0)-code.k0
-2= 2n0
-0= 2(r1+r0
-2+r0
-0), wherer0
-2is the
-number of check symbols of the ( u+r0
-2;r0
-2)-codeC2, andr0
-0is the number of check symbols of the
-(n0
-0;k0
-0)-code.
-By substituting the expressions for k2,k0
-2presented above into (60), we get the equivalent
-inequalityu 2r0
-2+ 2r0 2r0
-00. In order to prove this inequality it is sucient to show that
-u2r0
-2andr0r0
-0.
-The rst inequality holds because under the theorem's condition, Rc2
-3for the (u+r0
-2;r0
-2)-
-code. In order to prove the second inequality, we note that r0is the number of check symbols of the
-30information block of length k0=u+r1andr0
-0is the number of check symbols of the information
-block of length k0
-0=r1+r0
-2. It is clear that k0k0
-0and it is followed from Varshamov-Gilbert
-inequality thatd
-n0maintains a constant value as the information block length increases in order to
-get the required error correction capability. Therefore r0r0
-0and this completes the proof of the
-theorem. 
-With the purpose of comparing the protocols performance with hashing and with extraction,
-let us nd the relation of key rate for suciently large `.
-Theorem 14 As the key length `!1 , then the following relations hold
-R=H2(pw) g(pm)
-3 + 2g(pm); (61)
-R=H2(pw) g(pm)
-2 + 4g(pm); (62)
-Rext=Rext=H1(pw) g(pm)
-1 + 2g(pm): (63)
-Proof. The proofs of (61) and (62) were presented in [22]. In order to prove (63), let us write the
-relations of the key rates at the extandext-protocols taking into account (20), (52), (53), (54):
-Rext=`
-k1+ 2n0
-=`
-k1+k2
-=`
-k1+ 2(k0+r0)
-=`
-k1+ 2u+ 2r1+ 2r0; (64)
-Rext=`
-k1+u+ 2n0
-=`
-k1+u+k2
-=`
-k1+u+ 2(k0+r0)
-=`
-k1+u+ 2u+ 2r1+ 2r0; (65)
-31whereuis the length of the extractor seed, r1is the length of the check string for the ( k1+r1;k1)-
-code,r2is the length of the check symbols string for the ( u+r2;u)-code, and r0is the length of
-the check string for the AC-code.
-According to (13), r=kg(pm) for suciently large `(and hence suciently large k). Let us
-rewrite (64), (65) as
-Rext=`
-k1(1 + 2g(pm)) + 2u+ 2r0; (66)
-Rext=`
-(k1+u)(1 + 2g(pm)) + 2r0: (67)
-According with (47),
-k1=`c 2 logPrisk+u+ 3 log`
-Iadm
-2` 2
-+ 3
-H1 g(pm): (68)
-Substituting k1into (66) produces
-Rext=H1 g(pm)
-c(1 + 2g(pm)) + 2 (H1 g(pm)) u
-`+r0
-`: (69)
-It is easy to show that
-lim
-`!1u
-`= 0:
-Also theorem 5 establishes that lim `!1r0
-k0+r0= 0, but since k0!1 as long as`!1 , according
-to (47) and (52) we get lim `!1r0
-`= 0. Now we can write (69), in the limit Rext=H1(pw) g(pm)
-c(1+2g(pm)),
-which approaches to a maximum as c!1. This provides a proof of (63) for the ext-protocol.
-Similarly, by expressing Rextas (67) using k1as in (68), the used arguments in the proof of (63)
-for theext-protocol, show that (63) holds also for the ext-protocol. 
-The following trivial corollary results from the above theorem.
-Corollary 1 If the channel parameters pmandpware such that
-H1(pw) g(pm)
-1 + 2g(pm)H2(pw) g(pm)
-3 + 2g(pm)(70)
-32and
-2 (H1(pw) g(pm))H2(pw) g(pm); (71)
-thenRextRandRextRrespectively for suciently large `.
-Corollary 2 Ifpm= 0, thenRextRandRextR.
-Proof. Ifpm= 0, then the relations (70), (71) can be written as
-H1(pw)1
-3H2(pw) andH1(pw)1
-2H2(pw):
-Since 2H1(pw)H2(pw) [14], then RextRandRextR. 
-Let us exemplify the above results and illustrate that the Rext(`) andRext(`)-protocols major
-theR(`) andR(`)-protocols respectively. Let us select the following natural requirements for the
-KDP:
-Iadm= 10 30; Pd=Pe=Pf=Prisk= 10 5: (72)
-In gure 5 we plot the key rates Rkversus its length `for bothRext(`) andRext(`)-protocols
-withpm= 0:01 and 0.001, pw= 0:2, and the requirements presented in (72).
-The optimization of chas been performed for every value of `. For comparison purposes the
-dependences R(`) andR(`) are shown also in the gure.
-The following conclusions are drawn immediately after an examination of the obtained depen-
-dence.
-The protocols using extractors have greater key rate than the and-protocols under suciently
-large`and smallpm. It is worth to note that if for the and-protocols the asymptotically possible
-value key rate calculated by (61), (62) can be achieved even in the considered key length range, it
-is not true for the extandext-protocols, demonstrating a noticeable increasing proliferation of
-the key rate outside this range.
-We can see that the ext-protocol is superior than the -protocol when ` >5105withpm=
-0:01 and the ext-protocol is superior than the -protocol when ` > 3:5106andpm= 0:001
-(under the stated requirements in our investigations). The key length for which the extandext-
-protocols are superior than the and-protocols essentially depends on the error probabilities in
-33Figure 5: The key rates versus their lengths for dierent requirements imposed to KDPs.
-the communication channels.
-Theext-protocol is superior than the ext-protocol, although these protocols have the same
-asymptotic key rate. Hence, protocols with extractors are superior than the protocols with hashing,
-whenpm= 0.
-4 Key distribution protocols under the condition that legal users
-shared short authentication key before starting the KDP
-The0and0-protocols have been introduced in [22], which dier from the and-protocols in
-that legal users A and B have got a short key SA=SBof length`0before starting the KDP. This
-key can be used for authentication of messages transmitted over public discussion channels in order
-to get nally the key of length `>>` 0.
-In this section we consider some modication of the 0and0-protocols in which instead of hash
-34functions, extractors are used in order to generate the nal key. We call these protocols the 0
-ext
-and0
-ext-protocols , respectively.
-0
-ext-protocol Let us suppose that the users A and B have binary strings Xk,Ykrespectively.
-1. The user A calculates the check string Crof lengthrfor the string Xkusing an error correcting
-(k+r;k)-codeCthat should be agreed between the legal users in advance.
-2. The user A generates a random binary string uof lengthu.
-3. The user A computes the authenticator wfor the message ( Cr;u) using a keyed hash function
-from the-ASU 2class, and the key SA.
-4. The user A sends to user B over a PDC the message ( Cr;u) appending to it the authenticator
-w.
-5. The user B veries the authenticity of ( Cr;u) using the algorithm presented in section 2. If
-the authenticity of ( Cr;u) is conrmed, then B goes to the next step, otherwise he rejects
-it.
-6. The user B corrects errors in the string Ykusing the check string Cr. (We denote by ~Ykthe
-stringYkafter error correction).
-7. Both users A and B compute their keys as KA=Eext(Xk;u),KB=Eext(~Yk;u).
-0
-ext-protocol In a similar manner there is a modied -protocol where the random string uis
-not transmitted over the PDC but it is formed from the random sequences Xk,Yk.
-The users A and B divide each of the strings Xk,Ykobtained after execution of the initialization
-phase into two disjoint substrings Xk1
-1,Xk2
-2;Yk1
-1,Yk2
-2, respectively. Then they perform the following
-steps:
-1. The user A calculates the check string Cr1
-1of lengthr1for the substring Xk1
-1using an error
-correcting ( k1+r1;k1)-codeC1.
-2. The user A calculates the check string Cr2
-2of lengthr2for the substring Xk2
-2using an error
-correcting ( k2+r2;k2)-codeC2.
-353. The user A forms the authenticator wfor the message ( Cr1
-1;Cr2
-2), using a keyed hash function
-from the class -ASU 2and the key SAwith length `0.
-4. The user A sends to B the message ( Cr1
-1;Cr2
-2) appended with the authenticator w.
-5. The user B veries the authenticity of the message ( Cr1
-1;Cr2
-2) using the authentication algo-
-rithm (see section 2) and the key SB. If authenticity is conrmed, then user B goes to the
-next step, otherwise he rejects the KDP.
-6. The user B corrects errors in the strings Yk1
-1,Yk2
-2using the check strings Cr1
-1andCr2
-2. (We
-denote by ~Yk1
-1,~Yk2
-2the strings Yk1
-1,Yk2
-2after error correction.)
-7. The user A takes the string Xk2
-2as seeduand the user B takes the string ~Yk2
-2as seedu.
-8. Both users A and B compute their keys as KA=Eext(Xk1
-1;Xk2
-2),KB=Eext(~Yk1
-1;~Yk2
-2).
-Let us estimate the key rate of these protocols.
-Theorem 15 Let us suppose that the users A, B and the adversary E have binary strings Xk,Yk
-andZk, respectively after execution of the initialization phase over the wire-tape channel, pm=
-Pr (xi6=yi),pw= min(Pr (xi6=zi);Pr (yi6=zi),pm0,pw> pm. We assume that the users A
-and B share initially a short key Sof length`0in order to authenticate messages transmitted over
-the PDC.
-Then A and B are able to form a common key of length `satisfying the requirements (2)-(6)
-after the execution of the 0
-extand0
-ext-protocols if the lengths k1,k2of substrings Xk,YkandZk
-and`0satisfy the equations listed below:
-k1= logPadm
-e
-E(Rc1); (73)
-k1H1=`c+r1 logPadm
-risk+u
-+3 log`Iadm
-2` 2
-+ 3; (74)
-whereRc1andE(Rc1)are calculated by (10)-(12) and
-k2=8
-><
->:0for the0
-ext-protocol,
-ufor the0
-ext-protocol,(75)
-36and
-u=2
-66666
-logk1
-Iadm
-2` 2
-lnc3
-77777&
-logk1Iadm
-2` 2'
-(76)
-is the number of the extractor random symbols, cis the parameter under optimization,
-`0=a(2 +i)
-2i; (77)
-i+ 1
-2a
-2iPadm
-d; (78)
-where
-a=8
-><
->:r1+ufor the0
-ext-protocol,
-r1+r2for the0
-ext-protocol,(79)
-andr2being the number of check symbols of the error correcting (k2+r2;k2)-codeC2found similarly
-as in eq's (73)-(74). The key rate is then determined as:
-R0
-ext= max
-c`
-k1; R0
-ext= max
-c`
-k1+k2: (80)
-Proof. The relations (73), (74) and (76) can be proved similarly as (45), (46) and (47) in
-theorem 10. The relation (75) is apparent from the protocols description. In order to prove (77), (78)
-we assume that for authentication of messages of length a(see relation (79)) an -ASU 2-hash-
-function is used. Relying on (15) we write 2a=q2i, 2`0=qi+2,=i+1
-q. Let us put q= 2b,
-then
-a= 2ib ; ` 0=b(i+ 2); =i+ 1
-2b: (81)
-Let us assume that the probability of false message deception is equal to =Padm
-d. Then from (81),
-the relations (77), (78) are valid. The relation (80) follows from the protocols denition taking into
-account that the number of the extractor random bits can be optimized with respect to c. 
-By substituting (74) into (80) and using (13) we get that as `!1 :
-R0
-ext=`[H1 g(pm)]
-Den 1; (82)
-R0
-ext=`[H1 g(pm)]
-Den 2; (83)
-37Figure 6: Key rates versus its length for dierent KDP provided initially with short authentication
-keys.
-where
-Den 1=`c logPrisk+u+ 3 log`Iadm
-2` 2
-+ 3;
-Den 2=Den 1+u:
-From (82), (83), we have R0
-extR0
-ext. When`!1 both protocols have the same key rates
-R0
-ext=R0
-ext=H1 g(pm): (84)
-Let us compare the key rates of the 0
-extand0
-ext-protocols and the 0and0-protocols. In [22]
-the following relations have been proved:
-R0!H2(pw) g(pm)
-R0!1
-2[H2(pw) g(pm)]9
->=
->;as`!1:
-Comparing these relations with (84) we may conclude that R0R0
-ext=R0
-extfor any values pw
-andpm.R0can be either larger or smaller than R0
-ext=R0
-extdepending on the ratio of pwand
-pm.
-In order to illustrate the above assertions we plot in gure 6 the dependence of the key rate
-versus its length for the 0,0,0
-extand0
-ext-protocols, given pw= 0:2,pm= 0:01 andIadm= 10 30,
-Padm
-e=Padm
-d=Padm
-risk= 10 5.
-38Table 1: Groups of hybrid protocols
-Protocol group Authentication
-key gen-
-erationKey gen-
-eration
-1(;0), (;0),
-(;0), (;0)hashing hashing
-2(;0
-ext), (;0
-ext),
-(;0
-ext), (;0
-ext)hashing extracting
-3(ext;0), (ext;0),
-(ext;0), (ext;0)extracting hashing
-4(ext;0
-ext),
-(ext;0
-ext),
-(ext;0
-ext),
-(ext;0
-ext)extracting extracting
-5 Two-stage (hybrid) protocols with extractors
-We remember that the hybrid protocols [22, 25] are combinations of protocol pairs ( ;0), (;0),
-(;0), (;0) where the rst protocol in each pair is used in order to generate a relatively short
-keySof length`0required for hash function and check bits authentication, whereas the second
-protocol is used in order to form the nal key K.
-The keysSandKcan be obtained by execution of the privacy amplication procedure based
-either on the use of hash functions or extractors. This means that for every above mentioned hybrid
-protocol pair, there are four variants of hashing or extracting applications. In total, there can be
-formed 16 protocols, which in turn can be split into four groups as shown in table 1.
-The rst group of protocols was investigated in [22], and there it has been proved that every
-such protocol can be the most ecient depending on the additional key requirements imposed to
-it. It is worth to note that even for large length `of the keyK, the length `0of the authentication
-key occurs moderate [22] (p. 2543). If `= 32000 (pm= 0:01,pw= 0:2,Padm= 510 6), then
-`0= 678. But since, as shown in section 3, extractors are superior than hash functions only with
-large key lengths, their application is useless in the rst stage of the hybrid protocols, where a short
-key is required.
-Therefore, the protocols from groups 3 and 4 have not been considered. It is sucient to
-investigate protocols from the second group, where the authentication key is generated by hashing
-and the generation of the nal keys is performed by extraction. Thus we consider the following
-39Figure 7: Dierent types of hybrid protocol with extractors.
-hybrid protocols: ( ;0
-ext), (;0
-ext), (;0
-ext), (;0
-ext). For a more detailed description with the
-design of these protocols and the specication requirements of each protocol component, we refer
-to [22] (p. 2544).
-Let us give a short description of the ( ;0
-ext)-protocol. It is based on the ( ;0)-protocol
-proposed by Korzhik and Morales [25]. In this protocol, the sequences Xk,Ykof users A and B
-are divided into three parts Xk1
-1,Xk2
-2,Xk3
-3andYk1
-1,Yk2
-2,Yk3
-3respectively (see gure 7-a). The
-subsequences Xk1
-1,Xk2
-2, (Yk1
-1,Yk2
-2) are used for the generation of the authentication keys SA(SB).
-The subsequence Xk3
-3(Yk3
-3) and the key SA(SB) are used in the 0
-ext-protocol for nal KA(KB)
-key generation. The key rate of this protocol can be written as
-R(;0
-ext)=`
-k1+k2+k3=`
-k3+`0
-R; (85)
-whereR=`
-k1+k2is the keySrate at the length `0in the-protocol.
-Let us prove the following lemma.
-Lemma 2 The convergence`0
-`!0, as`!1 , holds in the (;0
-ext)-protocol.
-Proof. Let us consider the ( ;0
-ext)-protocol. According to (79) the input block length of the
-40-ASU 2hash function used in the ext-protocol is equal to a=r3+u. We show initially that
-r3+u!1 as`!1 . The relations (76) and (11) give
-u
-logk3
-Iadm
-2` 22
-lnc; (86)
-r3= (1 Rc)k3: (87)
-Thus in order to prove that r3+u!1 it is necessary to show that k3!1 as`!1 . Taking
-into account equation (13), we can present (74) in the form
-k3=`c logPadm
-risk+u+ 3 log`
-Iadm
-2` 2
-+ 3
-H1(pw) g(pm): (88)
-From the above relation, it follows that k3!1 as`!1 and both (86), (87) result as r3!1
-andu!1 . Then using (77) for an estimation of the hash function parameters, we may write
-lim
-i!1`0
-a= lim
-i!1i+ 2
-2i= 0:
-
-Using (88), the relation (85) can be expressed as
-R(;0
-ext)=H1(pw) g(pm)
-Den 3; (89)
-where
-Den 3=c
- ` 1"
-logPadm
-risk+u+ 3 log`Iadm
-2` 2
-+ 3#
-+`0
-`H1(pw) g(pm)
-R:
-Taking into account that Ris constant and`0
-`!0 (see Lemma 2) we can see that the last
-term in the denominator Den 3of (89) approaches to zero as `!1 . The other terms in the
-denominator Den 3also approach to zero because they consist either of values approaching zero or
-41have a logarithmic dependence on `.
-Since the right side of (89) approaches a maximum, R(;0
-ext)approaches a maximum as c!1,
-then the following asymptotic estimation holds for the key rate of the ( ;0
-ext)-protocol
-R(;0
-ext)=H1(pw) g(pm); (90)
-R
-(;0
-ext)=H1(pw) aspm!0: (91)
-In the (;0
-ext)-protocol (see gure 7-b) the sequences Xk,Ykare divided into four parts Xk1
-1,
-Xk2
-2,Xk3
-3,Xk4
-4andYk1
-1,Yk2
-2,Yk3
-3,Yk4
-4, respectively. The subsequences Xk1
-1,Xk2
-2,Xk3
-3andYk1
-1,
-Yk2
-2,Yk3
-3are used in the -protocol in order to generate the authentication key Sof length`0.
-The subsequence Xk4
-4(Yk4
-4) is used in the 0
-ext-protocol for nal keys KA,KBgeneration. One can
-write
-R(;0
-ext)=`
-k4+`0
-R;
-whereR=`0
-k1+k2+k3is the authentication key rate.
-By comparing this protocol with the previous one, we can conclude that for the same length `
-of the nal key, the equality k4=k3should hold. As it was shown in [22], RRand the length
-`0of authentication key for the -protocol is larger than the length `0of the authentication key
-for the-protocol. Hence
-`0(-protocol)
-R`0(-protocol)
-R
-andR(;0
-ext)R(;0
-ext).
-It is easy to show that
-R(;0
-ext)=H1(pw) g(pm) as`!1; (92)
-that coincides with the key rate of the ( ;0
-ext)-protocol, see (91). If pm= 0 we get by (92)
-R
-(;0
-ext)=H1(pm):
-Next let us consider the ( ;0
-ext)-protocol (see gure 7-c) in which each sequence Xk,Ykis
-42divided into four parts Xk1
-1,Xk2
-2,Xk3
-3,Xk4
-4andYk1
-1,Yk2
-2,Yk3
-3,Yk4
-4, respectively. The subsequences
-Xk1
-1,Xk2
-2andYk1
-1,Yk2
-2are used in the -protocol for the generation of the key SA, orSBfor the
-0
-ext-protocol, while subsequences Xk3
-3,Xk4
-4andYk3
-3,Yk4
-4are used in the 0
-ext-protocol for the nal
-keyKA(KB) generation assuming Xk4
-4andYk4
-4as random \seeds" k4while using in extractor.
-Similarly to (85) we can write
-R(;0
-ext)=`
-k3+u+`0
-R:
-The parameter `0is smaller in this protocol than in the ( ;0
-ext)-protocol, because only to au-
-thenticate the check sequences Xk3
-3andXk4
-4of total length r1+r2there is used an -ASU 2hash-
-function. However the additional item ( u) calculated by (76) increases the denominator and hence
-R(;0
-ext)R(;0
-ext).
-In the (;0
-ext)-protocol, each sequence Xk,Ykis divided into ve parts Xk1
-1,Xk2
-2,Xk3
-3,Xk4
-4,
-Xk5
-5andYk1
-1,Yk2
-2,Yk3
-3,Yk4
-4Yk5
-5, respectively (see gure 7-d). The subsequences Xk1
-1,Xk2
-2,Xk3
-3
-andYk1
-1,Yk2
-2,Yk3
-3are used in the -protocol to generate the keys SA,SB. The subsequences Xk4
-4,
-Xk5
-5andYk4
-4Yk5
-5are used in the 0
-ext-protocol to generate the keys KA,KB. Let us write
-R(;0
-ext)=`
-k4+u+`0
-R:
-In this relation by the same reason mentioned during the analysis of the ( ;0
-ext)-protocol, the
-value`0will be smaller than in the ( ;0
-ext)-protocol and the rate Ris larger. Therefore the third
-item is slightly decreasing. However the presence of suciently large item u results in a key rate
-decreasing giving the inequality R(;0
-ext)R(;0
-ext).
-There may be for the ( ;0
-ext), (;0
-ext)-protocols some equivalent statement to Lemma 2, e.g.
-it can be proved that`0
-`!0 as`!1 . Furthermore, by writing the relations for k3,k4andu,
-from theorem 12 it is very simple to get asymptotically achievable the key rate for the ( ;0
-ext),
-(;0
-ext)-protocols.
-R(;ext)=R(;0
-ext)=H1(pw) g(pm): (93)
-Comparing (90), (92) and (93) we can see that asymptotically all hybrid protocols have the same
-43Figure 8: The key rates for hybrid protocol.
-key rates, however the ( ;0
-ext)-protocol has non-asymptotically the largest key rate among all
-above considered hybrid protocols.
-It is worth to compare this protocol with the ( ;0)-protocol, that (as shown in [22]) has
-maximum possible key rate for suciently large `among all hybrid protocols using hash functions
-in the privacy amplication procedure.
-For the (;0)-protocol one can write [22]
-R(;0)=H2(pm) g(pm) (94)
-By comparing (92) with (94) and taking into account that H2(pm)H1(pm) we can see that for
-large`,R(;0
-ext)R(;0
-ext).
-From this inequality, it follows that an implementation of extractors for large key length in
-hybrid protocols are inecient.
-In gure 8 there are plotted the key rates versus its length for hybrid protocols under the
-conditionspm= 0:01,pw= 0:2,Iadm= 10 30,Padm
-e=Padm
-d=Padm
-f= 10 5.
-The curves R(`) were plotted with the use of the technique proposed in [22]. They clearly
-demonstrate a behavior of the key rate depending on the key length for dierent protocols. We can
-see that the ( ;0) and (;0)-protocols have the greatest key rates among all hybrid protocols. The
-(;0), (;0), (;0
-ext), and (;0
-ext)-protocols have approximately equal key rates for large key
-44length and the ( ;0
-ext) and (;0
-ext)-protocols have the least key rate among the above considered
-hybrid protocols.
-6 Conclusions
-In the current paper, an investigation of key distribution protocols based on noisy channels started
-in [22] has been continued with such a dierence that extractors are used instead of hash-functions in
-the privacy amplication procedure. The main goal was to prove extractor-based protocols eciency
-by the criterion of key rate maximization. The relations are non-asymptotic and constructive
-because they do not include some uncertain coecients in notations, in contrast with other papers.
-We use the modied Trevisan's extractor [30, 29] in our paper. It has been proposed new ext
-and
-ext-protocols which dier from those known before [17] because the extractor's seed is not
-transmitted over the PDC but, instead, it is generated from random sequences obtained by legal
-user after the execution of the initialization phase. We proved that the use of extractors in the
-extandext-protocols increases the rate, in comparison with hashing-based protocols only for very
-large key length `(typically`2[105;106]) and for some specied values of the error probabilities
-both in the main and in the wire-tap channels.
-It was investigated a performance evaluation of the so called extractor-based hybrid protocols,
-consisting of two protocols executed in a serial manner where the rst protocol in a pair is used for
-the generation of a relatively short key Sof length`0. This key is necessary for authentication of
-check bits, and a random number (seed) of extractor. The second protocol is used for the nal key
-generation. We prove that extractor based protocols should be used only in the second protocol of
-the pair.
-We selected four hybrid protocols for further investigation ( ;0
-ext), (;0
-ext), (;0
-ext) and
-(;0
-ext)-protocols. The relations for their key rates have been derived for both nite and asymp-
-totically growing key lengths. The greatest key rate is got for the ( ;0
-ext)-protocol. This protocol
-was compared with the ( ;0)-protocol considered in [22], which has the greatest key rate among
-all hybrid hashing-based protocols. The investigations showed that hybrid protocols with the use
-of extractor-based second stage protocols are less ecient than hashing-based protocol.
-45We investigated also (but not in a deeper detail) other variants of extractors from [29]. Even with
-some improvement of their characteristics (in the sense of the seed length), the general conclusion
-is kept the same: the use of extractors is justied only with very large key length.
-We get also asymptotic estimates for the key rates of all proposed protocols that allows to
-compare the potential eciency of all considered early protocols. These relations are presented
-in table 2. We can see that asymptotically all hybrid protocols have the same key rates equal to
-H1(pw) g(pm), that is larger than the key rates for single extandext-protocols that is equal
-toH1(pw) g(pm)
-1+2g(pm).
-These relations are similar \on structure" to relations for key capacity g(pw) g(pm), [19], but
-dier from the last one in changing of Shannon's entropy g(pw) to min entropy H1(pw).
-If the main channel is noiseless then all protocols using extractors have the same asymptotic key
-rates equal to H1(pw). It is worth to note that asymptotically all hybrid extractor-based protocols
-are inferior to hash-based protocols. But this conclusion may be considered as a consequence of
-crude estimate of information leaking to eavesdropper based on the use of min entropy.
-We summarize the key rates for dierent KDP in table 2. It can be seen from this table how
-closer or farther are the key rates to the secret key capacity given by (7).
-References
-[1] E. H. Knill, \Building quantum computers/ plenary talk presented at the 2007 ieee inter-
-national symposium on informational theory," IEEE Information Theory Society Newsletter ,
-vol. 58, no. 4, pp. 32{35, Dec. 2008.
-[2] C. E. Shannon, \Communication theory of secrecy systems." Bell System Technical Journal ,
-vol. 28, no. 4, pp. 656{715, 1949.
-[3] M. E. Hellman, \An extension of the Shannon theory approach to cryptography." IEEE Trans-
-actions on Information Theory , vol. 23, no. 2, pp. 289{294, 1977.
-[4] C. H. Bennett and G. Brassard, \Quantum cryptography: Public key distribution and coin
-tossing," in Proceedings of International Conference on Computers, Systems and Signal Pro-
-cessing , December 1984.
-46Table 2: Key rates for dierent KDP
-Protocol type (2) (3) (4)
-ext`
-T2
-T1(1+2g(pm))+2u+2r0T1
-1+2g(pm)T0
-ext`T2
-T1+u
-(1+2g(pm))+2r0T1
-1+2g(pm)T0
-0
-ext `T1
-T2T1T0
-0
-ext `T1
-T2T1T0
-(;0
-ext) `T1
-T2+`0T1
-RT1T0
-(;0
-ext) `T1
-T2+`0T1
-RT1T0
-(;0
-ext)`T1
-T2+u+`0T1
-RT1T0
-(;0
-ext)`T1
-T2+u+`0T1
-RT1T0
-(2): Non asymptotic relations for key
-ratesRk
-(3): Asymptotic relations for Rk, as
-`!1
-(4): Asymptotic relations for Rk, as
-`!1 ,pm!0
-T0=H1(pw)
-T1=T0 g(pm)
-T2=c`+u+a
-a= 2Padm
-risk+ 3 log`Iadm
-2` 2
-+ 3
-uis given by relation (48) and R,Rwere introduced in [22].
-47[5] T. Aono, K. Higuchi, T. Ohira, B. Komiyama, and H. Sasaoka, \Wireless secret key generation
-exploiting reactance-domain scalar response of multipath fading channels," IEEE Transactions
-on Antennas and Propagation , vol. 53, no. 11, pp. 3776{3784, 2005.
-[6] A. Kitaura and H. Sasaoka, \A scheme of private key agreement based on the channel char-
-acteristics in OFDM land mobile radio." Electronics and Communications in Japan (Part III:
-Fundamental Electronic Science) , vol. 88, no. 9, pp. 1{10, 2005.
-[7] H. Mori, H. Sasaoka, and T. Ohira, \Performance estimation of secret key agreement system
-exploiting an ESPAR antenna and a received signal strength indicator," in ISSSE2004 . IEICE,
-2004.
-[8] H. Imai, K. Kobara, and K. Morozov, \On the possibility of key agreement using variable
-directional antenna," in Proc. 1-st Joint Workshop on Information Security , 2006, pp. 1432{
-1436.
-[9] R. Ahlswede and I. Csiszar, \Common randomness in information theory and cryptography
-{ part I: Secret sharing," IEEE Transactions on Information Theory , vol. 39, no. 4, pp.
-1121{1132, 1993. [Online]. Available: citeseer.ist.psu.edu/ahlswede93common.html
-[10] C. H. Bennett, G. Brassard, C. Crepeau, and U. M. Maurer, \Generalized privacy amplica-
-tion," IEEE Transactions on Information Theory , vol. 41, no. 6, pp. 1915{1923, 1995.
-[11] U. Maurer, \Secret key agreement by public discussion from common information." IEEE
-Transactions on Information Theory , vol. 39, no. 3, pp. 733{742, 1993.
-[12] ||, \Information-theoretically secure secret-key agreement by not authenticated public dis-
-cussion," Lecture Notes in Computer Science , vol. 1233, pp. 209{223, 1997.
-[13] ||, \Protocols for secret key agreement by public discussion based on common information."
-inCRYPTO , ser. Lecture Notes in Computer Science, E. F. Brickell, Ed., vol. 740. Springer,
-1992, pp. 461{470.
-[14] U. Maurer and S. Wolf, \Privacy amplication secure against active adversaries," Lecture
-Notes in Computer Science , vol. 1294, pp. 307{321, 1997.
-48[15] ||, \Secret-key agreement over unauthenticated public channels I: Denitions and a com-
-pleteness result." IEEE Transactions on Information Theory , vol. 49, no. 4, pp. 822{831, 2003.
-[16] ||, \Secret-key agreement over unauthenticated public channels II: the simulatability con-
-dition." IEEE Transactions on Information Theory , vol. 49, no. 4, pp. 832{838, 2003.
-[17] ||, \Secret-key agreement over unauthenticated public channels III: Privacy amplication."
-IEEE Transactions on Information Theory , vol. 49, no. 4, pp. 839{851, 2003.
-[18] ||, \Unconditionally secure key agreement and the intrinsic conditional information." IEEE
-Transactions on Information Theory , vol. 45, no. 2, pp. 499{514, 1999.
-[19] ||, \Towards characterizing when information-theoretic secret key agreement is possible."
-inASIACRYPT , ser. Lecture Notes in Computer Science, K. Kim and T. Matsumoto, Eds.,
-vol. 1163. Springer, 1996, pp. 196{209.
-[20] V. Korzhik, V. Yakovlev, and A. Sinuk, \Achievability of the key-capacity in a scenario of
-key sharing by public discussion in the presence of passive eavesdropper," in MMM-ACNS .
-Springer Lecture Notes in Computer Science 2776, 2003, pp. 308{315.
-[21] ||, \Key distribution based on noisy channel and error detecting codes," in Proc. Workshop
-MMM ACNS 2001 . Springer Lecture Notes in Computer Science 2052, 2001, pp. 242{250.
-[22] V. Yakovlev, V. I. Korzhik, and G. Morales-Luna, \Key distribution protocols based on noisy
-channels in presence of an active adversary: Conventional and new versions with parameter
-optimization," IEEE Transactions on Information Theory , vol. 54, no. 6, pp. 2535{2549, 2008.
-[23] V. Korjik, G. Morales-Luna, and V. Balakirsky, \Privacy amplication theorem for noisy main
-channel," Lecture Notes in Computer Science , vol. 2200, pp. 18{26, 2001.
-[24] D. Stinson, \Universal hashing and authentication codes," Lecture Notes in Computer Science ,
-vol. 576, pp. 74{85, 1992.
-[25] V. I. Korzhik and G. Morales-Luna, \Hybrid authentication based on noisy channels." Int. J.
-Inf. Sec. , vol. 1, no. 4, pp. 203{210, 2003.
-49[26] V. Korzhik, V. Yakovlev, G. Morales-Luna, and R. Chesnokov, \Performance evaluation of
-keyless authentication based on noisy channel," in Computer Network Security , ser. Commu-
-nications in Computer and Information Science, V. Gorodetsky, I. Kotenko, and V. A. Skormin,
-Eds., vol. 1. Springer, 2007, pp. 115{126.
-[27] V. Korjik and M. Bakin, \Information-theoretically secure keyless authentication," in Proc.
-IEEE Symp. on IT'2000 . IEEE, 2000, p. 20.
-[28] R. Raz, O. Reingold, and S. P. Vadhan, \Extracting all the randomness and reducing the error
-in Trevisan's extractors." J. Comput. Syst. Sci. , vol. 65, no. 1, pp. 97{128, 2002.
-[29] ||, \Error reduction for extractors," in FOCS '99: Proceedings of the 40th Annual Sympo-
-sium on Foundations of Computer Science . Washington, DC, USA: IEEE Computer Society,
-1999, p. 191.
-[30] L. Trevisan, \Construction of extractors using pseudo-random generators (extended abstract)."
-inProceedings of the 31 annual ACM Symposium on Theory of Computing , 1999, pp. 141{148.
-[31] V. Korzhik, V. Yakovlev, and G. Morales-Luna, \Non-asymptotic performance evaluation of
-key distribution protocols based on noisy channels in presence of active adversary," in Proc.
-X. Spanish Meeting on Cryptology and Information Security , 2008, pp. 63{68.
-[32] F. MacWilliams and N. Sloane, The Theory of Error-Correcting Codes . North-Holland, 1977.
-50
