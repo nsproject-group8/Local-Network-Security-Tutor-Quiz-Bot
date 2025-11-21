@@ -534,6 +534,7 @@ For questions or issues, please open a GitHub issue or contact the development t
 
 **Docker-Commands**
 
+docker compose exec ollama ollama pull llama3.2:3b
 docker compose build frontend
 docker compose build backend
 docker compose up -d --build

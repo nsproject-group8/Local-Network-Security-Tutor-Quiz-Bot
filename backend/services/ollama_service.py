@@ -64,15 +64,16 @@ class OllamaService:
             return False
     
     def generate(
-        """
-        Generate text using the Ollama LLM model.
-        """
+       
         self,
         prompt: str,
         system_prompt: Optional[str] = None,
         temperature: float = 0.7,
         max_tokens: int = 512
     ) -> str:
+        """
+        Generate text using the Ollama LLM model.
+        """
         """Generate text using Ollama."""
         try:
             # Check cache first

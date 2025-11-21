@@ -27,15 +27,15 @@ class QATutorAgent:
         self.ollama = ollama_service
     
     def _create_citation(
-        """
-        Create a citation object from search results.
-        """
         self,
         source: str,
         content: str,
         distance: float,
         metadata: dict
     ) -> Citation:
+        """
+        Create a citation object from search results.
+        """
         """Create a citation object from search results."""
         return Citation(
             source=source,
