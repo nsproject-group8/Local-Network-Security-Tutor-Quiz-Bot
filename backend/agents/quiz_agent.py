@@ -199,14 +199,29 @@ Only output valid JSON, nothing else."""
                 json_match = json_match[start:end]
             
             data = json.loads(json_match)
-            
+
+            # Ensure the parsed JSON contains the expected fields; if not, fall back
+            question_text = data.get('question')
+            correct_answer_text = data.get('correct_answer')
+            topic_text = data.get('topic', 'Network Security')
+
+            if not question_text or not correct_answer_text:
+                # Fallback: ask LLM for missing parts separately
+                if not question_text:
+                    q_prompt = f"Based on the content below, generate a single open-ended network security question.\n\nContent: {context[:1000]}\n\nOnly output the question text."
+                    question_text = self.ollama.generate(prompt=q_prompt, temperature=0.7).strip()
+
+                if not correct_answer_text:
+                    a_prompt = f"Provide a detailed expected answer for the following question based on the content below.\n\nQuestion: {question_text}\n\nContent: {context[:1000]}\n\nOnly output the answer text."
+                    correct_answer_text = self.ollama.generate(prompt=a_prompt, temperature=0.3).strip()
+
             return QuizQuestion(
                 id=str(uuid.uuid4()),
                 type=QuestionType.OPEN_ENDED,
-                question=data['question'],
+                question=question_text,
                 options=None,
-                correct_answer=data['correct_answer'],
-                topic=data.get('topic', 'Network Security'),
+                correct_answer=correct_answer_text,
+                topic=topic_text,
                 citation=Citation(
                     source=metadata.get('source', 'Unknown'),
                     content=context[:300],
@@ -216,7 +231,35 @@ Only output valid JSON, nothing else."""
             )
         except Exception as e:
             logger.error(f"Error generating open-ended question: {e}")
-            return None
+            # As a last-resort fallback, attempt to generate a question and answer directly
+            try:
+                question_text = self.ollama.generate(
+                    prompt=f"Create a concise open-ended network security question based on: {context[:1000]}",
+                    temperature=0.7
+                ).strip()
+
+                correct_answer_text = self.ollama.generate(
+                    prompt=f"Provide a detailed expected answer for the question: {question_text}\nBased on the content: {context[:1000]}",
+                    temperature=0.3
+                ).strip()
+
+                return QuizQuestion(
+                    id=str(uuid.uuid4()),
+                    type=QuestionType.OPEN_ENDED,
+                    question=question_text,
+                    options=None,
+                    correct_answer=correct_answer_text,
+                    topic='Network Security',
+                    citation=Citation(
+                        source=metadata.get('source', 'Unknown'),
+                        content=context[:300],
+                        page=metadata.get('page'),
+                        confidence=0.7
+                    )
+                )
+            except Exception as e2:
+                logger.error(f"Fallback generation also failed for open-ended question: {e2}")
+                return None
     
     def generate_quiz(self, request: QuizGenerationRequest) -> QuizResponse:
         """
