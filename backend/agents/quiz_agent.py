@@ -41,6 +41,7 @@ class QuizAgent:
         Extract documents relevant to a specific topic or all documents.
         """
         """Extract documents relevant to a specific topic or all documents."""
+        #based on topic specific quizzes
         if topic:
             results = self.chroma.query_similar(
                 query_text=topic,
@@ -58,8 +59,9 @@ class QuizAgent:
                     })
         else:
             # Get random documents
+            #random topic quizzes
             all_docs = self.chroma.get_all_documents()
-            documents = []
+            documentfs = []
             if all_docs['documents']:
                 for doc, metadata in zip(
                     all_docs['documents'][:50],  # Limit to first 50
@@ -75,6 +77,7 @@ class QuizAgent:
     def _generate_mcq(self, context: str, metadata: dict) -> Optional[QuizQuestion]:
         """Generate a multiple-choice question from context."""
         prompt = f"""Based on the following network security content, create ONE multiple-choice question with 4 options.
+        The question should test understanding of key concepts and cover conceptual questions only. No Personal or Faculty details, dates of assignments.
 
 Content: {context[:1000]}
 
@@ -125,6 +128,8 @@ Only output valid JSON, nothing else."""
     def _generate_true_false(self, context: str, metadata: dict) -> Optional[QuizQuestion]:
         """Generate a true/false question from context."""
         prompt = f"""Based on the following network security content, create ONE true/false question.
+        The question should test understanding of key concepts and cover conceptual questions only. No Personal or Faculty details, dates of assignments.
+
 
 Content: {context[:1000]}
 
@@ -173,6 +178,7 @@ Only output valid JSON, nothing else."""
     def _generate_open_ended(self, context: str, metadata: dict) -> Optional[QuizQuestion]:
         """Generate an open-ended question from context."""
         prompt = f"""Based on the following network security content, create ONE open-ended question that requires a detailed answer.
+        The question should test understanding of key concepts and cover conceptual questions only. No Personal or Faculty details, dates of assignments.
 
 Content: {context[:1000]}
 
@@ -199,29 +205,14 @@ Only output valid JSON, nothing else."""
                 json_match = json_match[start:end]
             
             data = json.loads(json_match)
-
-            # Ensure the parsed JSON contains the expected fields; if not, fall back
-            question_text = data.get('question')
-            correct_answer_text = data.get('correct_answer')
-            topic_text = data.get('topic', 'Network Security')
-
-            if not question_text or not correct_answer_text:
-                # Fallback: ask LLM for missing parts separately
-                if not question_text:
-                    q_prompt = f"Based on the content below, generate a single open-ended network security question.\n\nContent: {context[:1000]}\n\nOnly output the question text."
-                    question_text = self.ollama.generate(prompt=q_prompt, temperature=0.7).strip()
-
-                if not correct_answer_text:
-                    a_prompt = f"Provide a detailed expected answer for the following question based on the content below.\n\nQuestion: {question_text}\n\nContent: {context[:1000]}\n\nOnly output the answer text."
-                    correct_answer_text = self.ollama.generate(prompt=a_prompt, temperature=0.3).strip()
-
+            
             return QuizQuestion(
                 id=str(uuid.uuid4()),
                 type=QuestionType.OPEN_ENDED,
-                question=question_text,
+                question=data['question'],
                 options=None,
-                correct_answer=correct_answer_text,
-                topic=topic_text,
+                correct_answer=data['correct_answer'],
+                topic=data.get('topic', 'Network Security'),
                 citation=Citation(
                     source=metadata.get('source', 'Unknown'),
                     content=context[:300],
@@ -231,35 +222,33 @@ Only output valid JSON, nothing else."""
             )
         except Exception as e:
             logger.error(f"Error generating open-ended question: {e}")
-            # As a last-resort fallback, attempt to generate a question and answer directly
-            try:
-                question_text = self.ollama.generate(
-                    prompt=f"Create a concise open-ended network security question based on: {context[:1000]}",
-                    temperature=0.7
-                ).strip()
+            return None
 
-                correct_answer_text = self.ollama.generate(
-                    prompt=f"Provide a detailed expected answer for the question: {question_text}\nBased on the content: {context[:1000]}",
-                    temperature=0.3
-                ).strip()
+    def _build_question_type_plan(
+        self,
+        num_questions: int,
+        requested_types: List[QuestionType]
+    ) -> List[QuestionType]:
+        """Create a balanced list of question types to ensure uniform coverage."""
+        if num_questions <= 0:
+            return []
 
-                return QuizQuestion(
-                    id=str(uuid.uuid4()),
-                    type=QuestionType.OPEN_ENDED,
-                    question=question_text,
-                    options=None,
-                    correct_answer=correct_answer_text,
-                    topic='Network Security',
-                    citation=Citation(
-                        source=metadata.get('source', 'Unknown'),
-                        content=context[:300],
-                        page=metadata.get('page'),
-                        confidence=0.7
-                    )
-                )
-            except Exception as e2:
-                logger.error(f"Fallback generation also failed for open-ended question: {e2}")
-                return None
+        types = requested_types or [QuestionType.MULTIPLE_CHOICE]
+        unique_types = list(dict.fromkeys(types))
+        plan: List[QuestionType] = []
+
+        base_count = num_questions // len(unique_types)
+        remainder = num_questions % len(unique_types)
+
+        for idx, q_type in enumerate(unique_types):
+            count = base_count + (1 if idx < remainder else 0)
+            plan.extend([q_type] * count)
+
+        if len(plan) < num_questions:
+            plan.extend(unique_types[:num_questions - len(plan)])
+
+        random.shuffle(plan)
+        return plan[:num_questions]
     
     def generate_quiz(self, request: QuizGenerationRequest) -> QuizResponse:
         """
@@ -283,6 +272,12 @@ Only output valid JSON, nothing else."""
                 questions=[]
             )
         
+        # Build a uniform plan of question types so each type is covered fairly.
+        question_type_plan = self._build_question_type_plan(
+            request.num_questions,
+            request.question_types
+        )
+
         # Generate questions
         questions = []
         attempts = 0
@@ -294,8 +289,8 @@ Only output valid JSON, nothing else."""
             # Select random document
             doc = random.choice(documents)
             
-            # Select random question type
-            question_type = random.choice(request.question_types)
+            # Use planned question type to keep distribution uniform
+            question_type = question_type_plan[len(questions)] if question_type_plan else QuestionType.MULTIPLE_CHOICE
             
             # Generate question based on type
             question = None

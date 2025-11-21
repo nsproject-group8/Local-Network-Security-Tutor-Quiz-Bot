@@ -53,7 +53,7 @@ function QATutor() {
               </p>
               <div style={{ display: 'flex', gap: '1rem', fontSize: '0.75rem', color: '#6b7280' }}>
                 {citation.page && <span>Page {citation.page}</span>}
-                <span>Confidence: {(citation.confidence * 100).toFixed(0)}%</span>
+                {/*<span>Confidence: {(citation.confidence * 100).toFixed(0)}%</span>*/}
               </div>
             </div>
           ))}
@@ -109,7 +109,7 @@ function QATutor() {
               Answer
             </h3>
             <span className="badge badge-info">
-              Confidence: {(response.confidence_score * 100).toFixed(0)}%
+              {/*Confidence: {(response.confidence_score * 100).toFixed(0)}%*/}
             </span>
           </div>
           

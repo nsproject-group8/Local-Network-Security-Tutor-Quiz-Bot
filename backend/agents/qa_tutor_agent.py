@@ -185,7 +185,7 @@ Keep your answer concise."""
 Answer questions accurately based on the provided context. 
 If the context doesn't contain the answer, say so clearly.
 Be concise but thorough in your explanations.
-Include technical details when relevant."""
+Include technical details when relevant. Always give the answers within a 150-200 token range and complete the answer."""
                 
                 try:
                     answer = ollama_service.generate_with_context(
